@@ -26,7 +26,8 @@ Build Progress:
 - [ ] Step 4: Build frontend components from design
 - [ ] Step 5: Build backend API (if needed)
 - [ ] Step 6: Write tests
-- [ ] Step 7: Generate documentation in Notion
+- [ ] Step 7: Start dev server + optional tunnel
+- [ ] Step 8: Generate documentation in Notion
 ```
 
 ### Step 1: Select Stitch project and review designs
@@ -185,7 +186,28 @@ npx playwright test
 php artisan test --coverage
 ```
 
-### Step 7: Generate documentation in Notion
+### Step 7: Start dev server and optional tunnel
+
+Start the development server in background:
+```bash
+pnpm dev &
+```
+
+**Ask the user:** "The dev server is running at http://localhost:3000. Do you want to create a public tunnel to share it?"
+
+If yes, create a tunnel using Cloudflare (no account needed):
+```bash
+npx cloudflared tunnel --url http://localhost:3000
+```
+
+Or using Vercel (if authenticated):
+```bash
+vercel dev --listen 3000
+```
+
+Inform the user of the public URL. They can manage active tunnels with `/dev-tunnels`.
+
+### Step 8: Generate documentation in Notion
 
 Use Notion MCP to create a project page:
 
@@ -201,6 +223,7 @@ mcp__claude_ai_Notion__notion-create-pages({
     - How to run locally
     - How to deploy
     - Test coverage summary
+    - Tunnel URL (if created)
 })
 ```
 

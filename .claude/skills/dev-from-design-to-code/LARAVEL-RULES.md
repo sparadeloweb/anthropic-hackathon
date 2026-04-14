@@ -1,141 +1,250 @@
-# Laravel Best Practices
+# Laravel Specialist
 
-Derived from [laravel-specialist](https://skills.sh/jeffallan/claude-skills/laravel-specialist) and [Laravel MCP docs](https://laravel.com/docs/12.x/mcp).
+Source: [jeffallan/claude-skills/laravel-specialist](https://github.com/jeffallan/claude-skills)
 
-## Mandatory Requirements
+Senior Laravel specialist with deep expertise in Laravel 10+, Eloquent ORM, and modern PHP 8.2+ development.
 
-**Must do:**
-- PHP 8.2+ features: readonly, enums, typed properties
-- Type hint ALL method parameters and return types
-- Eager loading to prevent N+1 queries
-- API Resources for JSON transformation
+## Core Workflow
+
+1. **Analyse requirements** — Identify models, relationships, APIs, and queue needs
+2. **Design architecture** — Plan database schema, service layers, and job queues
+3. **Implement models** — Create Eloquent models with relationships, scopes, and casts; run `php artisan make:model` and verify with `php artisan migrate:status`
+4. **Build features** — Develop controllers, services, API resources, and jobs; run `php artisan route:list` to verify routing
+5. **Test thoroughly** — Write feature and unit tests; run `php artisan test` before considering any step complete (target >85% coverage)
+
+## Constraints
+
+### MUST DO
+- Use PHP 8.2+ features (readonly, enums, typed properties)
+- Type hint all method parameters and return types
+- Use Eloquent relationships properly (avoid N+1 with eager loading)
+- Implement API resources for transforming data
 - Queue long-running tasks
-- >85% test coverage
-- Service containers and dependency injection
-- PSR-12 coding standards
+- Write comprehensive tests (>85% coverage)
+- Use service containers and dependency injection
+- Follow PSR-12 coding standards
 
-**Must NOT do:**
-- Unprotected raw queries (SQL injection)
-- Skip eager loading
+### MUST NOT DO
+- Use raw queries without protection (SQL injection)
+- Skip eager loading (causes N+1 problems)
 - Store sensitive data unencrypted
-- Business logic in controllers
+- Mix business logic in controllers
 - Hardcode configuration values
-- Skip input validation
-- Use deprecated features
+- Skip validation on user input
+- Use deprecated Laravel features
+- Ignore queue failures
 
-## Architecture
+## Code Templates
 
-```
-app/
-├── Http/
-│   ├── Controllers/Api/
-│   │   └── ContactController.php
-│   ├── Requests/
-│   │   └── StoreContactRequest.php
-│   └── Resources/
-│       └── ContactResource.php
-├── Models/
-│   └── Contact.php
-├── Services/
-│   └── ContactService.php
-├── Jobs/
-│   └── SendContactNotification.php
-└── Mcp/               (if exposing MCP server)
-    ├── Servers/
-    ├── Tools/
-    └── Resources/
-```
-
-## Model Pattern
+### Eloquent Model
 
 ```php
-final class Contact extends Model
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+final class Post extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'phone', 'subject', 'message'];
+    protected $fillable = ['title', 'body', 'status', 'user_id'];
 
-    protected function casts(): array
+    protected $casts = [
+        'status' => PostStatus::class,
+        'published_at' => 'immutable_datetime',
+    ];
+
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('status', PostStatus::Published);
+    }
+}
+```
+
+### Migration
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('posts', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('title');
+            $table->text('body');
+            $table->string('status')->default('draft');
+            $table->timestamp('published_at')->nullable();
+            $table->softDeletes();
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('posts');
+    }
+};
+```
+
+### API Resource
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+final class PostResource extends JsonResource
+{
+    public function toArray(Request $request): array
     {
         return [
-            'subject' => ContactSubject::class, // backed enum
+            'id'           => $this->id,
+            'title'        => $this->title,
+            'body'         => $this->body,
+            'status'       => $this->status->value,
+            'published_at' => $this->published_at?->toIso8601String(),
+            'author'       => new UserResource($this->whenLoaded('author')),
+            'comments'     => CommentResource::collection($this->whenLoaded('comments')),
         ];
     }
 }
 ```
 
-## Controller Pattern
+### Queued Job
 
 ```php
-final class ContactController extends Controller
+<?php
+
+declare(strict_types=1);
+
+namespace App\Jobs;
+
+use App\Models\Post;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+
+final class PublishPost implements ShouldQueue
 {
-    public function store(
-        StoreContactRequest $request,
-        ContactService $service,
-    ): ContactResource {
-        $contact = $service->create($request->validated());
-        SendContactNotification::dispatch($contact);
-        return new ContactResource($contact);
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 3;
+    public int $backoff = 60;
+
+    public function __construct(
+        private readonly Post $post,
+    ) {}
+
+    public function handle(): void
+    {
+        $this->post->update([
+            'status'       => PostStatus::Published,
+            'published_at' => now(),
+        ]);
+    }
+
+    public function failed(\Throwable $e): void
+    {
+        logger()->error('PublishPost failed', [
+            'post' => $this->post->id,
+            'error' => $e->getMessage(),
+        ]);
     }
 }
 ```
 
-## Test Pattern (Pest)
+### Feature Test (Pest)
 
 ```php
-it('stores a contact submission', function () {
-    Queue::fake();
+<?php
 
-    $response = postJson('/api/contact', [
-        'name' => 'Test User',
-        'email' => 'test@example.com',
-        'message' => 'Hello',
-    ]);
+use App\Models\Post;
+use App\Models\User;
 
-    $response->assertCreated()
-        ->assertJsonStructure(['data' => ['id', 'name', 'email']]);
+it('returns a published post for authenticated users', function (): void {
+    $user = User::factory()->create();
+    $post = Post::factory()->published()->for($user, 'author')->create();
 
-    Queue::assertPushed(SendContactNotification::class);
+    $response = $this->actingAs($user)
+        ->getJson("/api/posts/{$post->id}");
+
+    $response->assertOk()
+        ->assertJsonPath('data.status', 'published')
+        ->assertJsonPath('data.author.id', $user->id);
 });
-```
 
-## Laravel MCP Integration
+it('queues a publish job when a draft is submitted', function (): void {
+    Queue::fake();
+    $user = User::factory()->create();
+    $post = Post::factory()->draft()->for($user, 'author')->create();
 
-If the project needs to expose an MCP server:
+    $this->actingAs($user)
+        ->postJson("/api/posts/{$post->id}/publish")
+        ->assertAccepted();
 
-```php
-// routes/ai.php
-use Laravel\Mcp\Facades\Mcp;
-
-Mcp::web('/mcp', AppServer::class)
-    ->middleware(['auth:sanctum']);
-```
-
-Tools provide structured AI access to app data:
-```php
-#[Description('List all services offered')]
-class ListServicesTool extends Tool
-{
-    public function handle(Request $request): Response
-    {
-        $services = Service::all();
-        return Response::structured($services->toArray());
-    }
-
-    public function schema(JsonSchema $schema): array
-    {
-        return [
-            'category' => $schema->string()->description('Filter by category'),
-        ];
-    }
-}
+    Queue::assertPushed(PublishPost::class, fn ($job) => $job->post->is($post));
+});
 ```
 
 ## Validation Checkpoints
 
-Before considering backend complete:
-- [ ] All migrations run successfully
-- [ ] Routes listed and correct (`php artisan route:list`)
-- [ ] Queue jobs process correctly
-- [ ] Tests pass with >85% coverage
-- [ ] PSR-12 compliant (`./vendor/bin/pint`)
+| Stage | Command | Expected Result |
+|-------|---------|-----------------|
+| After migration | `php artisan migrate:status` | All migrations show Ran |
+| After routing | `php artisan route:list --path=api` | New routes appear with correct verbs |
+| After job dispatch | `php artisan queue:work --once` | Job processes without exception |
+| After implementation | `php artisan test --coverage` | >85% coverage, 0 failures |
+| Before PR | `./vendor/bin/pint --test` | PSR-12 linting passes |
+
+## Laravel MCP Integration
+
+For exposing your app as an MCP server (AI agent integration):
+
+```bash
+composer require laravel/mcp
+php artisan vendor:publish --tag=ai-routes
+```
+
+Define tools in `app/Mcp/Tools/`, register in `routes/ai.php`:
+
+```php
+use Laravel\Mcp\Facades\Mcp;
+
+Mcp::web('/mcp', AppServer::class)->middleware(['auth:sanctum']);
+```
+
+## Knowledge Domain
+
+Laravel 10+, Eloquent ORM, PHP 8.2+, API resources, Sanctum/Passport, queues with Horizon, Livewire, Inertia, Octane, Pest/PHPUnit, Redis, broadcasting, events, notifications, task scheduling.

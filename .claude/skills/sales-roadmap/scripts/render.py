@@ -18,7 +18,10 @@ def _working_days_between(inicio: date, fin: date, dias_laborables: list[int], h
 
 def render(roadmap: Roadmap, config: dict, holidays: set[date]) -> str:
     lines: list[str] = []
-    lines.append(f"# Roadmap — {roadmap.proyecto}")
+    if roadmap.feature:
+        lines.append(f"# Roadmap — {roadmap.proyecto} — Feature: {roadmap.feature}")
+    else:
+        lines.append(f"# Roadmap — {roadmap.proyecto}")
     lines.append("")
 
     # Resumen ejecutivo
@@ -92,7 +95,10 @@ def render(roadmap: Roadmap, config: dict, holidays: set[date]) -> str:
     lines.append("")
     lines.append("```mermaid")
     lines.append("gantt")
-    lines.append(f"    title Roadmap — {roadmap.proyecto}")
+    if roadmap.feature:
+        lines.append(f"    title Roadmap — {roadmap.proyecto} — {roadmap.feature}")
+    else:
+        lines.append(f"    title Roadmap — {roadmap.proyecto}")
     lines.append("    dateFormat YYYY-MM-DD")
 
     by_phase: dict[str, list] = {}

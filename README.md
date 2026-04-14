@@ -109,22 +109,79 @@ Generates a website design in [Google Stitch](https://stitch.withgoogle.com) for
 
 **Requires:** Stitch MCP configured with API key. See `SETUP-STITCH.md` for details.
 
+### `/sales-roadmap`
+
+Estimates project timelines and builds Gantt-style roadmaps for product development. Cross-references requirements against the real team roster and current allocations to produce a schedule with named person assignments.
+
+**Features:**
+- Two modes: **New project** (from an existing Stitch design) or **New feature** (for an existing project/client)
+- Auto-detects Stitch designs and maps screens to the page catalog
+- Phase sequencing: Discovery → Design → Architecture → Backend + Frontend (parallel)
+- Seniority-aware scheduling (Junior x1.5, Semi x1.0, Senior x0.7)
+- Automatic start date shift if team capacity is insufficient
+- Argentine holidays 2026-2028 built in
+- Generates both Markdown (with Mermaid Gantt) and PDF outputs
+- Feature-mode outputs use the feature name as filename prefix
+
+**Usage:**
+```
+/sales-roadmap
+```
+
+Claude will ask whether you want to estimate a new project or add a feature to an existing one.
+
+**Structure:**
+```
+.claude/skills/sales-roadmap/
+├── SKILL.md                  # Main instructions
+├── data/
+│   ├── atomic-tasks.yaml     # Base hours per atomic task
+│   ├── pages.yaml            # Page catalog
+│   ├── features.yaml         # Feature catalog
+│   ├── integrations.yaml     # Integration catalog
+│   ├── dependencies.yaml     # Phase dependency graph
+│   ├── multipliers.yaml      # Difficulty & seniority multipliers
+│   ├── config.yaml           # Working hours config
+│   └── holidays-ar.yaml      # Argentine holidays
+├── roster/
+│   ├── employees.yaml        # Team members
+│   └── allocations.yaml      # Current project allocations
+├── scripts/
+│   ├── estimate.py           # Entry point
+│   ├── catalog.py            # Catalog loader & validator
+│   ├── scheduler.py          # Task expansion & scheduling engine
+│   ├── render.py             # Markdown/Gantt renderer
+│   └── roster.py             # Roster & availability calculator
+└── examples/                 # Input JSON files
+# Output goes to <repo_root>/roadmaps/<client_slug>/ (same pattern as stitch_designs/)
+```
+
+**Requires:** Python 3.10+, `uv` (dependencies installed on-demand).
+
 ### `/dev-from-design-to-code`
 
-Converts Stitch designs into production code: Next.js (React) frontend with optional Laravel API backend. Asks if backend is needed, scaffolds the project, splits designs into minimum components, writes Playwright + Pest tests, installs all dependencies, and documents everything in Notion.
+Converts Stitch designs into production code: Next.js (React) frontend with optional Laravel API backend. Asks if backend is needed, scaffolds the project, splits designs into minimum components, writes Playwright + Pest tests, installs all dependencies, starts dev server with optional public tunnel, and documents everything in Notion.
 
-**Includes:** REACT-RULES.md, NEXTJS-RULES.md, LARAVEL-RULES.md
+**Includes:** REACT-RULES.md (70 rules from Vercel), NEXTJS-RULES.md, LARAVEL-RULES.md (complete laravel-specialist), SETUP-GITHUB.md
 
 ### `/dev-deploy`
 
 Deploys frontend to Vercel and/or backend to Laravel Cloud. Runs pre-deploy checks (build, lint, tests), deploys via MCP or CLI, verifies production, and generates deployment documentation in Notion if missing.
 
+**Includes:** SETUP-DEPLOY.md
+
 ### `/dev-add-feature`
 
 Adds features or fixes bugs in existing code. Verifies GitHub CLI setup, creates branches with conventional naming, implements changes following project patterns, runs tests, creates PRs via `gh`, and updates Notion documentation.
+
+**Includes:** SETUP-GITHUB.md
 
 ### `/dev-review-pr`
 
 Reviews pull requests for code quality, performance, security, and best practices. Reads the full diff, checks against React and Laravel checklists, and posts review comments directly on GitHub via `gh` CLI.
 
-**Includes:** REACT-CHECKLIST.md, LARAVEL-CHECKLIST.md
+**Includes:** REACT-CHECKLIST.md, LARAVEL-CHECKLIST.md, SETUP-GITHUB.md
+
+### `/dev-tunnels`
+
+Manages public tunnels for local development servers. Creates, lists, and closes tunnels. Supports Cloudflare (free, no account), Vercel Dev, ngrok, and localtunnel.

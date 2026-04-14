@@ -111,7 +111,7 @@ Genera un diseno de sitio web en [Google Stitch](https://stitch.withgoogle.com) 
 
 ### `/dev-from-design-to-code`
 
-Convierte disenos de Stitch en codigo de produccion: frontend Next.js (React) con backend Laravel API opcional. Pregunta si necesita backend, scaffoldea el proyecto, divide disenos en componentes minimos, escribe tests (Playwright + Pest), instala dependencias, y documenta todo en Notion.
+Convierte disenos de Stitch en codigo de produccion: frontend Next.js (React) con backend Laravel API opcional. Pregunta si necesita backend, scaffoldea el proyecto, divide disenos en componentes minimos, escribe tests (Playwright + Pest), instala dependencias, levanta dev server con tunnel publico opcional, y documenta todo en Notion.
 
 ### `/dev-deploy`
 
@@ -124,3 +124,7 @@ Agrega features o corrige bugs en codigo existente. Verifica GitHub CLI, crea br
 ### `/dev-review-pr`
 
 Revisa pull requests por calidad de codigo, performance, seguridad y mejores practicas. Lee el diff completo, chequea contra checklists de React y Laravel, y postea comentarios de review directamente en GitHub via `gh` CLI.
+
+### `/dev-tunnels`
+
+Gestiona tunnels publicos para servidores de desarrollo local. Crea, lista y cierra tunnels. Soporta Cloudflare (gratis, sin cuenta), Vercel Dev, ngrok y localtunnel.

@@ -21,7 +21,8 @@ from roster import load_roster
 from scheduler import build_roadmap
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
-ROADMAPS_DIR = SKILL_ROOT / "roadmaps"
+REPO_ROOT = SKILL_ROOT.parent.parent.parent  # .claude/skills/sales-roadmap -> repo root
+ROADMAPS_DIR = REPO_ROOT / "roadmaps"
 
 
 def _slugify(text: str) -> str:
@@ -69,17 +70,25 @@ def main() -> int:
     # Organizar por cliente (lead). Si no se pasa, se usa el nombre del proyecto.
     cliente = input_data.get("cliente") or input_data.get("lead") or input_data["proyecto"]
     cliente_slug = _slugify(cliente)
-    proyecto_slug = _slugify(input_data["proyecto"])
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+    # Si es una feature nueva para proyecto existente, usar el nombre de la feature como prefijo.
+    feature = input_data.get("feature")
+    if feature:
+        file_prefix = _slugify(feature)
+        pdf_title = f"Roadmap — {input_data['proyecto']} — Feature: {feature}"
+    else:
+        file_prefix = _slugify(input_data["proyecto"])
+        pdf_title = f"Roadmap — {input_data['proyecto']}"
 
     target_dir = ROADMAPS_DIR / cliente_slug
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    md_path = target_dir / f"{proyecto_slug}-{timestamp}.md"
-    pdf_path = target_dir / f"{proyecto_slug}-{timestamp}.pdf"
+    md_path = target_dir / f"{file_prefix}-{timestamp}.md"
+    pdf_path = target_dir / f"{file_prefix}-{timestamp}.pdf"
 
     md_path.write_text(md, encoding="utf-8")
-    _write_pdf(md, pdf_path, title=f"Roadmap — {input_data['proyecto']}")
+    _write_pdf(md, pdf_path, title=pdf_title)
 
     print(f"[OK] Markdown: {md_path}", file=sys.stderr)
     print(f"[OK] PDF:      {pdf_path}", file=sys.stderr)
