@@ -79,3 +79,30 @@ Claude preguntara por la consulta de busqueda, preferencia de filtro y profundid
 ```
 
 **Requiere:** Variable de entorno `GOOGLE_PLACES_API_KEY`. Ver `SETUP.md` para detalles.
+
+### `/design-generating-websites`
+
+Genera disenos de sitios web profesionales en [Google Stitch](https://stitch.withgoogle.com) para leads scrapeados. Crea un proyecto Stitch por lead con design system personalizado y 5 pantallas (Landing, About, Services, Reviews, Contact) construidas con los datos reales del lead.
+
+**Funcionalidades:**
+- Procesa leads individuales, selecciones personalizadas, o todos los leads sin web
+- Analiza fotos, reviews, horarios y tipo de negocio para definir la direccion de diseno
+- Crea design systems con tipografia, colores y bordes apropiados por tipo de negocio
+- Genera pantallas desktop + mobile con prompts basados en datos reales
+- Sigue principios de UI/UX premium (sin estetica generica de IA)
+
+**Uso:**
+```
+/design-generating-websites
+```
+
+**Estructura:**
+```
+.claude/skills/design-generating-websites/
+├── SKILL.md                  # Instrucciones principales
+├── SETUP-STITCH.md           # Configuracion de Stitch MCP
+├── DESIGN-PRINCIPLES.md      # Guia de principios de diseno UI/UX
+└── SCREEN-PROMPTS.md         # Templates de prompts por tipo de pantalla
+```
+
+**Requiere:** Stitch MCP configurado con API key. Ver `SETUP-STITCH.md` para detalles.

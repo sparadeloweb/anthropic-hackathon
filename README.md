@@ -79,3 +79,30 @@ Claude will ask for search query, filter preference, and search depth before run
 ```
 
 **Requires:** `GOOGLE_PLACES_API_KEY` environment variable. See `SETUP.md` for details.
+
+### `/design-generating-websites`
+
+Generates professional website designs in [Google Stitch](https://stitch.withgoogle.com) for scraped leads. Creates one Stitch project per lead with a tailored design system and 5 screens (Landing, About, Services, Reviews, Contact) built from the lead's actual data.
+
+**Features:**
+- Processes single leads, custom selections, or all leads without a website
+- Analyzes photos, reviews, hours, and business type to inform design direction
+- Creates design systems with appropriate typography, colors, and roundness per business type
+- Generates desktop + mobile screens with data-driven prompts
+- Follows premium UI/UX principles (no AI-generic aesthetics)
+
+**Usage:**
+```
+/design-generating-websites
+```
+
+**Structure:**
+```
+.claude/skills/design-generating-websites/
+├── SKILL.md                  # Main instructions
+├── SETUP-STITCH.md           # Stitch MCP configuration
+├── DESIGN-PRINCIPLES.md      # UI/UX design guidelines
+└── SCREEN-PROMPTS.md         # Prompt templates per screen type
+```
+
+**Requires:** Stitch MCP configured with API key. See `SETUP-STITCH.md` for details.
