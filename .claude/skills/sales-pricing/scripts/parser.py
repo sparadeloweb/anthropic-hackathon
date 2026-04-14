@@ -94,14 +94,15 @@ def _parse_summary(text: str) -> dict:
 
 
 def _parse_hours_by_dept(text: str) -> dict[str, float]:
-    """Extracts the first table following the 'Horas por departamento' heading.
-    Works for both MD content and PDF-extracted text."""
+    """Extracts the first table following the hours-per-area/department heading.
+    Accepts both legacy ('Horas por departamento') and current ('Horas por área')
+    roadmap headings. Works for both MD content and PDF-extracted text."""
     result: dict[str, float] = {}
     in_section = False
     table_started = False
     for line in text.splitlines():
         stripped = line.strip()
-        if re.match(r"^##\s*Horas por departamento", stripped):
+        if re.match(r"^##\s*Horas por (departamento|[aá]rea)", stripped):
             in_section = True
             continue
         if not in_section:
@@ -110,7 +111,7 @@ def _parse_hours_by_dept(text: str) -> dict[str, float]:
             break
         if stripped.startswith("|"):
             table_started = True
-            if "---" in stripped or "Horas" in stripped:
+            if "---" in stripped or re.match(r"^\|\s*(Departamento|[ÁA]rea|Role|Rol)\s*\|", stripped):
                 continue
             cells = [c.strip() for c in stripped.strip("|").split("|")]
             if len(cells) >= 2:
@@ -124,7 +125,8 @@ def _parse_hours_by_dept(text: str) -> dict[str, float]:
 
 
 def _parse_phases(text: str) -> list[dict]:
-    """Extracts the 'Fases' table rows into {phase, start, end, hours}."""
+    """Extracts the phases table rows into {phase, start, end, hours}.
+    Accepts both 'Fases' and 'Fases del proyecto' headings."""
     result: list[dict] = []
     in_section = False
     table_started = False

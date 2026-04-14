@@ -1,6 +1,6 @@
 ---
 name: sales-pricing
-description: Generates client-ready commercial budgets from roadmaps previously produced by the sales-roadmap skill. Use it when the user asks for a budget, a quote, to price a roadmap, or to put together a commercial proposal for a client. Locates the most recent roadmap PDF for the given client+project, extracts hours by role, applies per-role hourly rates, and writes a Markdown and PDF budget with the total.
+description: Generates client-ready commercial budgets from roadmaps previously produced by the sales-roadmap skill. Use it when the user asks for a budget, a quote, to price a roadmap, or to put together a commercial proposal for a client. Locates the roadmap for the given client+project, extracts hours by role, applies per-role hourly rates, and writes a Markdown and PDF budget with the total.
 ---
 
 # Pricing layer on top of sales-roadmap
@@ -17,21 +17,25 @@ This skill reads a roadmap already produced by `sales-roadmap` and generates a c
 
 ## How it works
 
-1. **Source of truth** — roadmaps already live in `../sales-roadmap/roadmaps/<client_slug>/<project_slug>-<timestamp>.{md,pdf}` produced by `sales-roadmap`.
+1. **Source of truth** — roadmaps live in `<repo_root>/roadmaps/<client_slug>/<project_slug>.{md,pdf}` (or `<feature_slug>.{md,pdf}` for feature-mode roadmaps), produced by `sales-roadmap`.
 2. **User input** — JSON with `client`, `project`, `hourly_rates` (rates for the six canonical roles) and optional `currency` (default `USD`).
-3. **Parser** — finds the most recent file for that client+project, preferring the `.md` sidecar (robust to parse) and falling back to the `.pdf` if the Markdown is missing. Extracts hours by department, phases, and totals.
+3. **Parser** — finds the roadmap file for that client+project, preferring the `.md` sidecar (robust to parse) and falling back to the `.pdf` if the Markdown is missing. Extracts hours by role, phases, and totals. Tolerates both current (`Horas por área`) and legacy (`Horas por departamento`) section headings.
 4. **Normalization** — maps Spanish names to commercial categories: `Arquitectura→Architecture`, `Diseño→Design`, `Discovery→Product Owner`. Backend and Frontend pass through. `Project Management` stays at 0h if the roadmap does not include it.
-5. **Output** — Markdown + PDF written to `budgets/<client_slug>/<project_slug>-<timestamp>.{md,pdf}`, with executive summary, breakdown by role, project phases, and assumptions.
+5. **Output** — Markdown + PDF written to `<repo_root>/budgets/<client_slug>/<project_slug>.{md,pdf}` (or `<feature_slug>.{md,pdf}` when pricing a feature), with executive summary, breakdown by role, project phases, and assumptions.
+
+The PDF uses the same styling as `sales-roadmap`, so the commercial documents keep a consistent visual identity.
 
 ## Workflow
 
 When the user asks you to quote a project:
 
-1. **Verify the roadmap exists** — if the user has not generated it yet, tell them to run `sales-roadmap` first. This skill does not compute hours, only prices them.
+1. **Verify the roadmap exists** — look in `<repo_root>/roadmaps/` for a folder matching the client slug. If it is not there, tell the user to run `sales-roadmap` first. This skill does not compute hours, only prices them.
 
 2. **Collect the input** by asking the user for anything missing:
    - Client / lead name (`client`) — must match the one used when generating the roadmap
+   - (Optional) `client_slug` — use this to pin the folder name if the auto-slug would differ from the existing roadmap folder
    - Project name (`project`) — idem
+   - (Optional) `feature` — when present, the skill prices a feature-mode roadmap (`<feature_slug>.md`) instead of the project one
    - Hourly rates per role (`hourly_rates`): `backend`, `frontend`, `architecture`, `design`, `project_management`, `product_owner`
    - (Optional) `currency` — default `USD`
 
@@ -42,14 +46,15 @@ When the user asks you to quote a project:
    cd .claude/skills/sales-pricing
    uv run --with pyyaml --with markdown-pdf python scripts/pricing.py examples/<file>.json
    ```
-   This writes two files in `budgets/<client_slug>/<project_slug>-<timestamp>.{md,pdf}`.
+   This writes two files in `<repo_root>/budgets/<client_slug>/<slug>.{md,pdf}` where `<slug>` is `feature_slug` when pricing a feature, otherwise `project_slug`.
 
 5. **Present the result** to the user: show the total in the chosen currency, the path to the PDF, and the Markdown content of the budget (breakdown by role and phases).
 
 ## Roadmap selection
 
-- Looks in `../sales-roadmap/roadmaps/<client_slug>/` for files matching `<project_slug>-*.md` (or `.pdf` as a fallback).
-- When multiple files exist, uses the **most recent** by modification time.
+- Looks in `<repo_root>/roadmaps/<client_slug>/` for the file `<project_slug>.md` (or `.pdf` as a fallback).
+- If the input has a `feature` field, looks for `<feature_slug>.md` instead.
+- Supports legacy timestamped filenames (`<slug>-<timestamp>.{md,pdf}`): picks the most recent by modification time.
 - Logs which file was used to stderr: `[INFO] Using roadmap: <path>`.
 
 ## Canonical roles
@@ -70,6 +75,7 @@ If the roadmap contains a role that is not in the map, the budget will still inc
 ```json
 {
   "client": "Clínica San Martín",
+  "client_slug": "clinica-san-martin",
   "project": "SaaS de gestión de turnos",
   "currency": "USD",
   "hourly_rates": {
@@ -83,12 +89,13 @@ If the roadmap contains a role that is not in the map, the budget will still inc
 }
 ```
 
-Legacy Spanish keys (`cliente`, `proyecto`) are also accepted for backwards compatibility with existing `sales-roadmap` inputs.
+Legacy Spanish keys (`cliente`, `proyecto`, `cliente_slug`) are also accepted for backwards compatibility with existing `sales-roadmap` inputs.
 
 ## Maintenance
 
 - **Add a new role**: add it to `scripts/parser.py` (`ROLE_MAP` and `CANONICAL_ROLES`) and to `scripts/render.py` (`RATE_KEY_BY_ROLE`).
 - **Change default currency**: pass `currency` in the input (not hardcoded).
+- **Update PDF styling**: edit `PDF_CSS` in `scripts/pricing.py`. Keep it in sync with `sales-roadmap` for visual consistency.
 - **Add taxes / discounts / PM overhead**: extend `scripts/render.py::compute_budget` (out of MVP scope).
 
 ## Dependencies

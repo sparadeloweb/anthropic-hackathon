@@ -42,4 +42,4 @@
 
 ## Source
 
-- Base roadmap: `C:\Users\delfb\OneDrive\Escritorio\Proyectos Claude\Hackaton-Anthropic\agencIA\anthropic-hackathon\.claude\skills\sales-roadmap\roadmaps\clinica-san-martin\saas-de-gestion-de-turnos-20260414-160214.md`
+- Base roadmap: `C:\Users\delfb\OneDrive\Escritorio\Proyectos Claude\Hackaton-Anthropic\agencIA\anthropic-hackathon\roadmaps\clinica-san-martin\saas-de-gestion-de-turnos.md`
