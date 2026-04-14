@@ -1,6 +1,7 @@
 ---
 name: sales-finding-leads
 description: Finds business leads using Google Places API with deep grid-based search. Use when the user wants to find potential clients, leads, prospects, or businesses in a geographic area.
+model: sonnet
 allowed-tools: Bash(python *) Bash(pip *) Bash(source *) Bash(bash *) Read Write Edit
 ---
 

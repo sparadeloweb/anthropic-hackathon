@@ -15,6 +15,9 @@ leads/
 # Stitch design output
 stitch_designs/
 
+# Claude Code local settings (session permissions)
+.claude/settings.local.json
+
 # OS
 .DS_Store
 Thumbs.db

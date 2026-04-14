@@ -1,6 +1,7 @@
 ---
 name: creating-skills
 description: Creates new Claude Code skills following Agent Skills best practices. Use when the user wants to create a new skill, custom command, slash command, or extend Claude's capabilities with reusable instructions.
+model: opus
 allowed-tools: Bash(mkdir *) Read Write Edit Glob Grep
 ---
 
