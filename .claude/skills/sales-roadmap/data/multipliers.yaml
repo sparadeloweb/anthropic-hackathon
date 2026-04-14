@@ -1,0 +1,9 @@
+dificultad:
+  baja: 1.0
+  media: 1.8
+  alta: 3.0
+
+seniority:
+  junior: 1.5
+  semi: 1.0
+  senior: 0.7

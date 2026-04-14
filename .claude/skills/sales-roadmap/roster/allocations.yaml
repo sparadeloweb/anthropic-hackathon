@@ -1,0 +1,19 @@
+# Asignaciones vigentes a otros proyectos. Editar al confirmar un proyecto.
+
+- empleado_id: emp.001
+  proyecto: "Proyecto Alfa"
+  desde: 2026-04-01
+  hasta: 2026-05-15
+  dedicacion: 0.8
+
+- empleado_id: emp.004
+  proyecto: "Proyecto Beta"
+  desde: 2026-04-15
+  hasta: 2026-06-30
+  dedicacion: 1.0
+
+- empleado_id: emp.007
+  proyecto: "Proyecto Alfa"
+  desde: 2026-04-01
+  hasta: 2026-04-30
+  dedicacion: 0.5
