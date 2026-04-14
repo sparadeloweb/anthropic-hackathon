@@ -113,18 +113,134 @@ Genera un diseno de sitio web en [Google Stitch](https://stitch.withgoogle.com) 
 
 Convierte disenos de Stitch en codigo de produccion: frontend Next.js (React) con backend Laravel API opcional. Pregunta si necesita backend, scaffoldea el proyecto, divide disenos en componentes minimos, escribe tests (Playwright + Pest), instala dependencias, levanta dev server con tunnel publico opcional, y documenta todo en Notion.
 
+**Funcionalidades:**
+- Pregunta si necesita backend (Laravel API) antes de scaffoldear
+- Lee el HTML de Stitch y divide en componentes atomicos (`ui/`), bloques compuestos y layout
+- Server Components por defecto — `'use client'` solo cuando es necesario
+- Sigue las 70 reglas de [vercel-react-best-practices](https://github.com/vercel-labs/agent-skills) (waterfalls, bundle, server-side, re-renders)
+- Sigue [next-best-practices](https://github.com/vercel-labs/next-skills) (App Router, RSC, data patterns, image/font)
+- Backend Laravel sigue [laravel-specialist](https://github.com/jeffallan/claude-skills) (Eloquent, API Resources, Pest, >85% coverage)
+- Tests E2E con Playwright (frontend), tests de feature con Pest (backend)
+- Levanta dev server y ofrece tunnel publico (Cloudflare/Vercel)
+- Genera documentacion del proyecto en Notion via MCP
+
+**Uso:**
+```
+/dev-from-design-to-code
+```
+
+**Estructura:**
+```
+.claude/skills/dev-from-design-to-code/
+├── SKILL.md              # Workflow principal (8 pasos)
+├── REACT-RULES.md        # 70 reglas de Vercel (8 categorias)
+├── NEXTJS-RULES.md       # App Router, RSC, data patterns, image/font
+└── LARAVEL-RULES.md      # laravel-specialist completo (templates, checkpoints, MCP)
+```
+
+**Requiere:** Node.js 18+, Stitch MCP, Notion MCP. Laravel: PHP 8.2+, Composer.
+
 ### `/dev-deploy`
 
-Despliega frontend a Vercel y/o backend a Laravel Cloud. Ejecuta checks pre-deploy (build, lint, tests), despliega via MCP o CLI, verifica produccion, y genera documentacion de deploy en Notion si no existe.
+Despliega frontend a Vercel y/o backend a Laravel Cloud. Ejecuta checks pre-deploy, despliega via MCP o CLI, verifica produccion, y genera documentacion de deploy en Notion si no existe.
+
+**Funcionalidades:**
+- Auto-detecta tipo de proyecto (Next.js, Laravel, o ambos)
+- Checks pre-deploy: build, lint, tests Playwright, tests Pest
+- Frontend: despliega via Vercel MCP (OAuth) o Vercel CLI
+- Backend: despliega via Laravel Cloud CLI o SSH manual
+- Configura variables de entorno en el target de deploy
+- Verifica que la URL de produccion carga y los flujos criticos funcionan
+- Genera/actualiza guia de deploy en Notion con URLs, env vars, pasos de rollback
+
+**Uso:**
+```
+/dev-deploy
+```
+
+**Estructura:**
+```
+.claude/skills/dev-deploy/
+├── SKILL.md              # Workflow principal (6 pasos)
+└── SETUP-DEPLOY.md       # Setup de Vercel MCP, Vercel CLI, Laravel Cloud
+```
+
+**Requiere:** Vercel MCP o CLI. Laravel Cloud CLI para backend. Notion MCP para docs.
 
 ### `/dev-add-feature`
 
-Agrega features o corrige bugs en codigo existente. Verifica GitHub CLI, crea branches con naming convencional, implementa cambios siguiendo patrones del proyecto, corre tests, crea PRs via `gh`, y actualiza documentacion en Notion.
+Agrega features o corrige bugs en codigo existente. Crea workflow de git con branches, commits y PRs via GitHub CLI. Actualiza documentacion en Notion.
+
+**Funcionalidades:**
+- Verifica que `gh` CLI este instalado y autenticado — guia el setup si no
+- Pregunta: tipo de cambio (feature, bug fix, refactor, perf), descripcion, criterios de aceptacion
+- Crea branch con naming convencional (`feat/`, `fix/`, `refactor/`, `perf/`)
+- Implementa cambios siguiendo patrones del proyecto (reglas React, reglas Laravel)
+- Corre suite completa de tests antes de commitear
+- Crea PR via `gh pr create` con summary, test plan y Co-Authored-By
+- Actualiza documentacion en Notion si cambio el comportamiento
+
+**Uso:**
+```
+/dev-add-feature
+```
+
+**Estructura:**
+```
+.claude/skills/dev-add-feature/
+├── SKILL.md              # Workflow principal (6 pasos)
+└── SETUP-GITHUB.md       # Instalacion, auth y verificacion de gh CLI
+```
+
+**Requiere:** `gh` CLI instalado y autenticado. Git remote configurado.
 
 ### `/dev-review-pr`
 
-Revisa pull requests por calidad de codigo, performance, seguridad y mejores practicas. Lee el diff completo, chequea contra checklists de React y Laravel, y postea comentarios de review directamente en GitHub via `gh` CLI.
+Revisa pull requests por calidad de codigo, performance, seguridad y mejores practicas. Postea comentarios de review directamente en GitHub via `gh` CLI.
+
+**Funcionalidades:**
+- Carga contexto completo del PR: diff, archivos cambiados, comentarios, descripcion
+- Lee cada archivo cambiado en contexto completo (no solo el diff)
+- Chequea archivos React/Next.js contra REACT-CHECKLIST.md (performance, arquitectura, data fetching, seguridad, a11y, testing)
+- Chequea archivos Laravel contra LARAVEL-CHECKLIST.md (seguridad, arquitectura, database, calidad, testing)
+- Niveles de severidad: must fix, should fix, suggestion, nitpick
+- Postea comentarios inline en lineas especificas via `gh api`
+- Aprueba o pide cambios con body de review estructurado
+
+**Uso:**
+```
+/dev-review-pr 123
+```
+
+**Estructura:**
+```
+.claude/skills/dev-review-pr/
+├── SKILL.md              # Workflow principal (4 pasos)
+├── REACT-CHECKLIST.md    # Checklist de review React/Next.js
+├── LARAVEL-CHECKLIST.md  # Checklist de review Laravel
+└── SETUP-GITHUB.md       # Setup de GitHub CLI
+```
+
+**Requiere:** `gh` CLI instalado y autenticado. Acceso al repositorio.
 
 ### `/dev-tunnels`
 
-Gestiona tunnels publicos para servidores de desarrollo local. Crea, lista y cierra tunnels. Soporta Cloudflare (gratis, sin cuenta), Vercel Dev, ngrok y localtunnel.
+Gestiona tunnels publicos para servidores de desarrollo local. Crea, lista y cierra tunnels.
+
+**Funcionalidades:**
+- Lista todos los tunnels activos (Cloudflare, Vercel Dev, ngrok, localtunnel)
+- Crea nuevos tunnels en cualquier puerto con eleccion de proveedor
+- Cloudflare recomendado (gratis, sin cuenta, funciona via npx)
+- Cierra tunnels por PID, puerto, o todos a la vez
+- Limpia archivos de log de tunnels
+
+**Uso:**
+```
+/dev-tunnels
+```
+
+**Estructura:**
+```
+.claude/skills/dev-tunnels/
+└── SKILL.md              # Comandos: list, create, close
+```

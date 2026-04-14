@@ -162,26 +162,134 @@ Claude will ask whether you want to estimate a new project or add a feature to a
 
 Converts Stitch designs into production code: Next.js (React) frontend with optional Laravel API backend. Asks if backend is needed, scaffolds the project, splits designs into minimum components, writes Playwright + Pest tests, installs all dependencies, starts dev server with optional public tunnel, and documents everything in Notion.
 
-**Includes:** REACT-RULES.md (70 rules from Vercel), NEXTJS-RULES.md, LARAVEL-RULES.md (complete laravel-specialist), SETUP-GITHUB.md
+**Features:**
+- Asks if backend (Laravel API) is needed before scaffolding
+- Reads Stitch screen HTML and splits into atomic components (`ui/`), composed blocks, and layout elements
+- Server Components by default — `'use client'` only when needed
+- Follows all 70 rules from [vercel-react-best-practices](https://github.com/vercel-labs/agent-skills) (waterfalls, bundle, server-side, re-renders)
+- Follows [next-best-practices](https://github.com/vercel-labs/next-skills) (App Router, RSC, data patterns, image/font optimization)
+- Laravel backend follows [laravel-specialist](https://github.com/jeffallan/claude-skills) (Eloquent, API Resources, Pest tests, >85% coverage)
+- Playwright E2E tests for frontend, Pest feature tests for backend
+- Starts dev server in background and offers public tunnel (Cloudflare/Vercel)
+- Generates project documentation in Notion via MCP
+
+**Usage:**
+```
+/dev-from-design-to-code
+```
+
+**Structure:**
+```
+.claude/skills/dev-from-design-to-code/
+├── SKILL.md              # Main workflow (8 steps)
+├── REACT-RULES.md        # 70 rules from Vercel (8 categories)
+├── NEXTJS-RULES.md       # App Router, RSC, data patterns, image/font
+└── LARAVEL-RULES.md      # Full laravel-specialist (templates, checkpoints, MCP)
+```
+
+**Requires:** Node.js 18+, Stitch MCP, Notion MCP. Laravel: PHP 8.2+, Composer.
 
 ### `/dev-deploy`
 
-Deploys frontend to Vercel and/or backend to Laravel Cloud. Runs pre-deploy checks (build, lint, tests), deploys via MCP or CLI, verifies production, and generates deployment documentation in Notion if missing.
+Deploys frontend to Vercel and/or backend to Laravel Cloud. Runs pre-deploy checks, deploys via MCP or CLI, verifies production, and generates deployment documentation in Notion if missing.
 
-**Includes:** SETUP-DEPLOY.md
+**Features:**
+- Auto-detects project type (Next.js, Laravel, or both)
+- Pre-deploy checks: build, lint, Playwright tests, Pest tests
+- Frontend: deploys via Vercel MCP (OAuth) or Vercel CLI
+- Backend: deploys via Laravel Cloud CLI or manual SSH
+- Sets environment variables on deployment target
+- Verifies production URL loads and critical flows work
+- Generates/updates deployment guide in Notion with URLs, env vars, rollback steps
+
+**Usage:**
+```
+/dev-deploy
+```
+
+**Structure:**
+```
+.claude/skills/dev-deploy/
+├── SKILL.md              # Main workflow (6 steps)
+└── SETUP-DEPLOY.md       # Vercel MCP, Vercel CLI, Laravel Cloud setup
+```
+
+**Requires:** Vercel MCP or CLI. Laravel Cloud CLI for backend. Notion MCP for docs.
 
 ### `/dev-add-feature`
 
-Adds features or fixes bugs in existing code. Verifies GitHub CLI setup, creates branches with conventional naming, implements changes following project patterns, runs tests, creates PRs via `gh`, and updates Notion documentation.
+Adds features or fixes bugs in existing code. Creates proper git workflow with branches, commits, and PRs via GitHub CLI. Updates Notion documentation.
 
-**Includes:** SETUP-GITHUB.md
+**Features:**
+- Verifies `gh` CLI is installed and authenticated — guides setup if not
+- Asks: feature type (new feature, bug fix, refactor, perf), description, acceptance criteria
+- Creates branch with conventional naming (`feat/`, `fix/`, `refactor/`, `perf/`)
+- Implements changes following project patterns (React rules, Laravel rules)
+- Runs full test suite before committing
+- Creates PR via `gh pr create` with summary, test plan, and Co-Authored-By
+- Updates Notion documentation if behavior changed
+
+**Usage:**
+```
+/dev-add-feature
+```
+
+**Structure:**
+```
+.claude/skills/dev-add-feature/
+├── SKILL.md              # Main workflow (6 steps)
+└── SETUP-GITHUB.md       # GitHub CLI install, auth, verify
+```
+
+**Requires:** `gh` CLI installed and authenticated. Git remote configured.
 
 ### `/dev-review-pr`
 
-Reviews pull requests for code quality, performance, security, and best practices. Reads the full diff, checks against React and Laravel checklists, and posts review comments directly on GitHub via `gh` CLI.
+Reviews pull requests for code quality, performance, security, and best practices. Posts review comments directly on GitHub via `gh` CLI.
 
-**Includes:** REACT-CHECKLIST.md, LARAVEL-CHECKLIST.md, SETUP-GITHUB.md
+**Features:**
+- Loads full PR context: diff, changed files, comments, description
+- Reads every changed file in full context (not just the diff)
+- Checks React/Next.js files against [REACT-CHECKLIST.md](REACT-CHECKLIST.md) (performance, architecture, data fetching, security, a11y, testing)
+- Checks Laravel files against [LARAVEL-CHECKLIST.md](LARAVEL-CHECKLIST.md) (security, architecture, database, code quality, testing)
+- Severity levels: must fix, should fix, suggestion, nitpick
+- Posts inline comments on specific lines via `gh api`
+- Approves or requests changes with structured review body
+
+**Usage:**
+```
+/dev-review-pr 123
+```
+
+**Structure:**
+```
+.claude/skills/dev-review-pr/
+├── SKILL.md              # Main workflow (4 steps)
+├── REACT-CHECKLIST.md    # React/Next.js review checklist
+├── LARAVEL-CHECKLIST.md  # Laravel review checklist
+└── SETUP-GITHUB.md       # GitHub CLI setup
+```
+
+**Requires:** `gh` CLI installed and authenticated. Access to the repository.
 
 ### `/dev-tunnels`
 
-Manages public tunnels for local development servers. Creates, lists, and closes tunnels. Supports Cloudflare (free, no account), Vercel Dev, ngrok, and localtunnel.
+Manages public tunnels for local development servers. Creates, lists, and closes tunnels.
+
+**Features:**
+- Lists all active tunnels (Cloudflare, Vercel Dev, ngrok, localtunnel)
+- Creates new tunnels on any port with provider choice
+- Cloudflare recommended (free, no account needed, works via npx)
+- Closes tunnels by PID, port, or all at once
+- Cleans up tunnel log files
+
+**Usage:**
+```
+/dev-tunnels
+```
+
+**Structure:**
+```
+.claude/skills/dev-tunnels/
+└── SKILL.md              # Commands: list, create, close
+```
