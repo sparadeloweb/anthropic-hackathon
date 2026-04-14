@@ -26,7 +26,8 @@ Esta skill produce un roadmap de desarrollo tipo Gantt, con fechas, asignaciones
 Cuando el usuario te pida estimar un proyecto:
 
 1. **Recolectar el input** conversando con el usuario. Si falta algo, preguntá:
-   - Nombre del proyecto
+   - Nombre del cliente / lead (campo `cliente`) — define la carpeta de salida
+   - Nombre del proyecto (campo `proyecto`)
    - Fecha deseada de inicio (formato `YYYY-MM-DD`)
    - Páginas, features, integraciones: para cada una, `id` del catálogo + dificultad + cantidad
    - (Opcional) `empleados_id` si querés restringir el equipo
@@ -43,10 +44,11 @@ Cuando el usuario te pida estimar un proyecto:
 3. **Correr**:
    ```bash
    cd .claude/skills/sales-roadmap
-   python scripts/estimate.py examples/<archivo>.json -o /tmp/roadmap.md
+   uv run --with pyyaml --with markdown-pdf python scripts/estimate.py examples/<archivo>.json
    ```
+   Esto genera dos archivos en `roadmaps/<cliente_slug>/<proyecto_slug>-<timestamp>.{md,pdf}`.
 
-4. **Mostrar el Markdown** al usuario. Incluir el Gantt Mermaid tal cual (se renderiza en claude.ai, GitHub, Notion, mermaid.live).
+4. **Mostrar el resultado** al usuario: indicarle la ruta del PDF generado y pegar el contenido del Markdown (con el Gantt Mermaid). Los roadmaps quedan archivados por cliente en la carpeta `roadmaps/` de la skill.
 
 5. **Revisar supuestos** — señalar corrimiento de fecha si lo hubo, advertencias, horas totales por departamento.
 
@@ -69,7 +71,7 @@ python scripts/roster.py --validate
 ## Dependencias
 
 - Python 3.10+
-- `pyyaml` (`pip install pyyaml`)
+- `pyyaml` + `markdown-pdf` (se instalan on-demand con `uv run --with`)
 
 ## Escala de dificultad
 
