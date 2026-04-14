@@ -18,6 +18,12 @@ stitch_designs/
 # Roadmap output
 roadmaps/
 
+# Budget output
+budgets/
+
+# Proposal output
+proposals/
+
 # Claude Code local settings (session permissions)
 .claude/settings.local.json
 

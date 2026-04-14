@@ -1,7 +1,7 @@
 ---
 name: dev-deploy
 description: Deploys project code to Vercel (frontend) or Laravel Cloud (backend) using MCPs. Generates deployment documentation if missing. Use when the user wants to deploy, publish, or ship code to production.
-model: sonnet
+model: opus
 allowed-tools: Bash(*) Read Write Edit Glob Grep mcp__claude_ai_Notion__*
 ---
 

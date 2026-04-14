@@ -1,5 +1,6 @@
 ---
 name: sales-pricing
+model: sonnet
 description: Generates client-ready commercial budgets from roadmaps previously produced by the sales-roadmap skill. Use it when the user asks for a budget, a quote, to price a roadmap, or to put together a commercial proposal for a client. Locates the roadmap for the given client+project, extracts hours by role, applies per-role hourly rates, and writes a Markdown and PDF budget with the total.
 ---
 
