@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Light mode — "paper" ─────────────────────────────────────────────────── */
+:root {
+  --folio-base:            250 248 244;   /* #FAF8F4 — warm cream */
+  --folio-surface:         255 255 255;   /* #FFFFFF */
+  --folio-elevated:        243 239 233;   /* #F3EFE9 — warm parchment */
+  --folio-border:          22  16  8;     /* warm near-black for borders */
+  --folio-text-primary:    22  16  8;     /* #16100 8 — warm near-black */
+  --folio-text-secondary:  88  74  60;    /* #58 4A3C — warm brown */
+  --folio-text-muted:      162 148 134;   /* #A29486 — warm taupe */
+}
+
+/* ─── Dark mode — "charcoal" ─────────────────────────────────────────────── */
+.dark {
+  --folio-base:            20  16  12;    /* #14100C — very dark warm brown */
+  --folio-surface:         28  23  17;    /* #1C1711 */
+  --folio-elevated:        40  34  26;    /* #28221A */
+  --folio-border:          255 255 255;   /* white-tinted borders */
+  --folio-text-primary:    248 244 238;   /* #F8F4EE — warm white */
+  --folio-text-secondary:  192 178 162;   /* #C0B2A2 — warm light brown */
+  --folio-text-muted:      118 106  94;   /* #766A5E — warm mid */
+}
+
+/* ─── Base styles ───────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: rgb(var(--folio-base));
+  color: rgb(var(--folio-text-primary));
+  font-family: var(--font-inter), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--folio-border) / 0.12);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--folio-border) / 0.22);
+}
+
+/* ─── Focus rings ───────────────────────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid #D4704A;
+  outline-offset: 2px;
+}
+
+/* ─── Range input ───────────────────────────────────────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+}
+input[type="range"]::-webkit-slider-track {
+  background: rgb(var(--folio-border) / 0.12);
+  height: 4px;
+  border-radius: 2px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #D4704A;
+  margin-top: -6px;
+  box-shadow: 0 0 0 3px rgb(212 112 74 / 0.2);
+  transition: box-shadow 0.15s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 5px rgb(212 112 74 / 0.25);
+}
+input[type="range"]::-moz-range-track {
+  background: rgb(var(--folio-border) / 0.12);
+  height: 4px;
+  border-radius: 2px;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #D4704A;
+  border: none;
+}
+
+/* ─── Text input ────────────────────────────────────────────────────────────── */
+input[type="text"] {
+  background: rgb(var(--folio-elevated));
+  border: 1px solid rgb(var(--folio-border) / 0.12);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: rgb(var(--folio-text-primary));
+  transition: border-color 0.15s;
+  outline: none;
+}
+input[type="text"]:focus {
+  border-color: rgb(212 112 74 / 0.5);
+  box-shadow: 0 0 0 3px rgb(212 112 74 / 0.1);
+}
+input[type="text"]::placeholder {
+  color: rgb(var(--folio-text-muted));
+}
