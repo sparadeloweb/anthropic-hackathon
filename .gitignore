@@ -1,0 +1,17 @@
+# Environment variables (API keys, secrets)
+.env
+.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+
+# Leads output
+leads/
+
+# OS
+.DS_Store
+Thumbs.db

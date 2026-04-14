@@ -1,5 +1,23 @@
 # anthropic-hackathon
 
+## Setup
+
+```bash
+bash setup.sh
+```
+
+This will:
+1. Check for Python 3 (install it if missing via apt/brew)
+2. Create a virtual environment (`venv/`)
+3. Install dependencies from `requirements.txt`
+4. Create `.env` from `.env.example` if it doesn't exist
+
+Then edit `.env` and add your API keys:
+
+```bash
+GOOGLE_PLACES_API_KEY=your-actual-key-here
+```
+
 ## Skills
 
 This project uses [Agent Skills](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) to extend Claude Code capabilities.
@@ -28,3 +46,36 @@ Includes:
 ├── CHECKLIST.md              # Quality checklist
 └── FRONTMATTER-REFERENCE.md  # Frontmatter reference
 ```
+
+### `/sales-finding-leads`
+
+Finds business leads using Google Places API (New) with deep grid-based search that goes beyond the default 60-result API limit by subdividing the geographic area into a grid.
+
+**Features:**
+- Grid-based search (5x5 = 25 cells by default) to maximize results
+- Filter option: all results or only businesses without a website
+- Deduplication by place ID across grid cells
+- Full data: photos, reviews, opening hours, editorial summaries, payment options
+- Interactive HTML report (shadcn-style): compact table with click-to-detail view (photos, reviews, hours), search, sort, filter, and CSV export
+- Organized output: `./leads/YYYY-MM-DD/query-slug/`
+- Raw JSON output for AI analysis or further processing
+
+**Usage:**
+```
+/sales-finding-leads
+```
+
+Claude will ask for search query, filter preference, and search depth before running.
+
+**Structure:**
+```
+.claude/skills/sales-finding-leads/
+├── SKILL.md                  # Main instructions
+├── SETUP.md                  # Google Places API key setup
+├── scripts/
+│   └── find_leads.py         # Search and report generation script
+└── templates/
+    └── report_template.html  # HTML report template
+```
+
+**Requires:** `GOOGLE_PLACES_API_KEY` environment variable. See `SETUP.md` for details.

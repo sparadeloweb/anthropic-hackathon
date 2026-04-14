@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{QUERY}} — Leads</title>
+  <style>
+    :root {
+      --background: #09090b;
+      --foreground: #fafafa;
+      --muted: #18181b;
+      --muted-foreground: #a1a1aa;
+      --border: #27272a;
+      --secondary: #27272a;
+      --success: #22c55e;
+      --warning: #eab308;
+      --destructive: #ef4444;
+      --info: #3b82f6;
+      --radius: 0.5rem;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--background);
+      color: var(--foreground);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 24px 24px; }
+
+    /* Header */
+    header { border-bottom: 1px solid var(--border); padding: 20px 0; }
+    header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .header-left h1 { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.025em; }
+    .header-left p { font-size: 0.8125rem; color: var(--muted-foreground); margin-top: 2px; }
+    .header-right { display: flex; gap: 16px; font-size: 0.8125rem; color: var(--muted-foreground); }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 20px 0; }
+    .stat { border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+    .stat-label { font-size: 0.6875rem; color: var(--muted-foreground); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; margin-top: 2px; }
+
+    /* Toolbar */
+    .toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+    .input {
+      flex: 1; min-width: 180px; padding: 7px 12px;
+      background: var(--background); border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--foreground); font-size: 0.8125rem; outline: none;
+    }
+    .input:focus { border-color: #52525b; }
+    .input::placeholder { color: #52525b; }
+    .btn {
+      padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+      background: transparent; color: var(--foreground); font-size: 0.8125rem; font-weight: 500;
+      cursor: pointer; white-space: nowrap;
+    }
+    .btn:hover { background: var(--secondary); }
+    .btn.active { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
+    .toolbar-count { font-size: 0.8125rem; color: var(--muted-foreground); margin-left: auto; }
+
+    /* Table */
+    .table-container { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th {
+      padding: 9px 14px; text-align: left; font-size: 0.6875rem; font-weight: 500;
+      color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border); background: var(--muted);
+      cursor: pointer; user-select: none;
+    }
+    th:hover { color: var(--foreground); }
+    th.sorted-asc::after { content: " \2191"; }
+    th.sorted-desc::after { content: " \2193"; }
+
+    /* Column widths */
+    th:nth-child(1), td:nth-child(1) { width: 40px; }
+    th:nth-child(2), td:nth-child(2) { width: 22%; }
+    th:nth-child(3), td:nth-child(3) { width: auto; }
+    th:nth-child(4), td:nth-child(4) { width: 130px; }
+    th:nth-child(5), td:nth-child(5) { width: 60px; text-align: center; }
+    th:nth-child(6), td:nth-child(6) { width: 60px; text-align: center; }
+
+    td {
+      padding: 9px 14px; font-size: 0.8125rem;
+      border-bottom: 1px solid var(--border); vertical-align: middle;
+    }
+    tbody tr { cursor: pointer; transition: background 100ms; }
+    tbody tr:hover td { background: rgba(255,255,255,0.03); }
+
+    .cell-name, .cell-truncate {
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0;
+    }
+    .cell-name { font-weight: 500; }
+    .cell-phone {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.75rem; color: var(--muted-foreground);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cell-rating { font-size: 0.8125rem; }
+
+    .badge {
+      display: inline-flex; align-items: center; padding: 1px 7px;
+      border-radius: 9999px; font-size: 0.6875rem; font-weight: 500; border: 1px solid transparent;
+    }
+    .badge-destructive { background: rgba(127,29,29,0.3); color: #fca5a5; border-color: rgba(127,29,29,0.5); }
+    .badge-success { background: rgba(22,101,52,0.3); color: #86efac; border-color: rgba(22,101,52,0.5); }
+    .badge-outline { background: transparent; color: var(--muted-foreground); border-color: var(--border); }
+    .badge-info { background: rgba(30,64,175,0.3); color: #93c5fd; border-color: rgba(30,64,175,0.5); }
+
+    /* ───── Detail View ───── */
+    #detailView { display: none; }
+
+    .detail-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+      background: transparent; color: var(--foreground); font-size: 0.8125rem;
+      cursor: pointer; margin-bottom: 20px;
+    }
+    .detail-back:hover { background: var(--secondary); }
+
+    .detail-header { margin-bottom: 20px; }
+    .detail-header h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.025em; }
+    .detail-header p { font-size: 0.8125rem; color: var(--muted-foreground); margin-top: 4px; }
+    .detail-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .info-card {
+      border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px;
+    }
+    .info-card .label { font-size: 0.6875rem; color: var(--muted-foreground); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; }
+    .info-card .val { font-size: 0.875rem; margin-top: 4px; word-break: break-all; }
+    .info-card a { color: var(--info); text-decoration: none; }
+    .info-card a:hover { text-decoration: underline; }
+
+    .section {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 16px; overflow: hidden;
+    }
+    .section-header {
+      padding: 10px 16px; font-size: 0.6875rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground);
+      border-bottom: 1px solid var(--border); background: rgba(24,24,27,0.6);
+    }
+    .section-body { padding: 16px; }
+
+    /* Photos */
+    .photo-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+    .photo-grid img {
+      width: 200px; height: 130px; object-fit: cover;
+      border-radius: calc(var(--radius) - 2px); border: 1px solid var(--border);
+    }
+
+    /* Hours */
+    .hours-list { font-size: 0.8125rem; color: var(--muted-foreground); line-height: 1.9; }
+
+    /* Reviews */
+    .review-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .review-item:last-child { border-bottom: none; }
+    .review-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .review-stars { color: var(--warning); font-size: 0.8125rem; letter-spacing: 1px; }
+    .review-author { font-weight: 500; font-size: 0.8125rem; }
+    .review-time { color: var(--muted-foreground); font-size: 0.6875rem; margin-left: auto; }
+    .review-text { color: var(--muted-foreground); font-size: 0.8125rem; line-height: 1.6; }
+
+    footer {
+      text-align: center; padding: 32px 0; font-size: 0.6875rem;
+      color: var(--muted-foreground); border-top: 1px solid var(--border); margin-top: 32px;
+    }
+
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: repeat(3, 1fr); }
+      .detail-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-left">
+        <h1>{{QUERY}}</h1>
+        <p>Leads report</p>
+      </div>
+      <div class="header-right">
+        <span>{{DATE}}</span>
+        <span>{{FILTER_MODE}}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Stats -->
+    <div class="stats" id="statsBar">
+      <div class="stat"><div class="stat-label">Total</div><div class="stat-value">{{TOTAL}}</div></div>
+      <div class="stat"><div class="stat-label">Con web</div><div class="stat-value" style="color:var(--success)">{{WITH_WEBSITE}}</div></div>
+      <div class="stat"><div class="stat-label">Sin web</div><div class="stat-value" style="color:var(--warning)">{{WITHOUT_WEBSITE}}</div></div>
+      <div class="stat"><div class="stat-label">Rating</div><div class="stat-value">{{AVG_RATING}}</div></div>
+      <div class="stat"><div class="stat-label">Reviews</div><div class="stat-value">{{WITH_REVIEWS}}</div></div>
+      <div class="stat"><div class="stat-label">Fotos</div><div class="stat-value">{{WITH_PHOTOS}}</div></div>
+    </div>
+
+    <!-- List View -->
+    <div id="listView">
+      <div class="toolbar">
+        <input type="text" class="input" id="search" placeholder="Buscar...">
+        <button class="btn" id="filterAll" onclick="setFilter('all')">Todos</button>
+        <button class="btn" id="filterNoWeb" onclick="setFilter('no-web')">Sin web</button>
+        <button class="btn" id="filterWithWeb" onclick="setFilter('with-web')">Con web</button>
+        <button class="btn" onclick="exportCSV()">CSV</button>
+        <span class="toolbar-count" id="countLabel"></span>
+      </div>
+      <div class="table-container">
+        <table id="leadsTable">
+          <thead>
+            <tr>
+              <th data-col="0">#</th>
+              <th data-col="1">Nombre</th>
+              <th data-col="2">Direccion</th>
+              <th data-col="3">Telefono</th>
+              <th data-col="4">Web</th>
+              <th data-col="5">Rating</th>
+            </tr>
+          </thead>
+          <tbody>{{TABLE_ROWS}}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Detail View -->
+    <div id="detailView">
+      <button class="detail-back" onclick="hideDetail()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Volver a la lista
+      </button>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <footer>sales-finding-leads &middot; Google Places API (New)</footer>
+
+  <script>
+    const LEADS = {{LEADS_JSON}};
+    const tbody = document.querySelector('#leadsTable tbody');
+    const searchInput = document.getElementById('search');
+    const countLabel = document.getElementById('countLabel');
+    let currentFilter = 'all';
+    let sortCol = -1, sortAsc = true;
+
+    function getRows() { return Array.from(tbody.querySelectorAll('tr')); }
+
+    function updateCount() {
+      const vis = getRows().filter(r => r.style.display !== 'none').length;
+      countLabel.textContent = vis + ' / ' + LEADS.length;
+    }
+
+    function applyFilters() {
+      const q = searchInput.value.toLowerCase();
+      getRows().forEach(row => {
+        const idx = parseInt(row.dataset.idx);
+        const lead = LEADS[idx];
+        const text = (lead.name + ' ' + lead.address + ' ' + lead.phone).toLowerCase();
+        const matchSearch = !q || text.includes(q);
+        let matchFilter = true;
+        if (currentFilter === 'no-web') matchFilter = !lead.website;
+        if (currentFilter === 'with-web') matchFilter = !!lead.website;
+        row.style.display = matchSearch && matchFilter ? '' : 'none';
+      });
+      updateCount();
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      document.querySelectorAll('.toolbar .btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(f === 'all' ? 'filterAll' : f === 'no-web' ? 'filterNoWeb' : 'filterWithWeb').classList.add('active');
+      applyFilters();
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+
+    // Sorting
+    document.querySelectorAll('th[data-col]').forEach(th => {
+      th.addEventListener('click', () => {
+        const col = parseInt(th.dataset.col);
+        if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; }
+        document.querySelectorAll('th').forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
+        th.classList.add(sortAsc ? 'sorted-asc' : 'sorted-desc');
+        const rows = getRows();
+        rows.sort((a, b) => {
+          const av = a.children[col]?.textContent.trim() || '';
+          const bv = b.children[col]?.textContent.trim() || '';
+          const an = parseFloat(av), bn = parseFloat(bv);
+          if (!isNaN(an) && !isNaN(bn)) return sortAsc ? an - bn : bn - an;
+          return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+        });
+        rows.forEach(r => tbody.appendChild(r));
+      });
+    });
+
+    // Detail view
+    function showDetail(idx) {
+      const l = LEADS[idx];
+      document.getElementById('listView').style.display = 'none';
+      document.getElementById('statsBar').style.display = 'none';
+      const dv = document.getElementById('detailView');
+      dv.style.display = 'block';
+
+      const stars = n => '\u2605'.repeat(Math.round(n)) + '\u2606'.repeat(5 - Math.round(n));
+
+      let html = '<div class="detail-header">';
+      html += '<h2>' + l.name + '</h2>';
+      html += '<p>' + l.address + '</p>';
+      html += '<div class="detail-tags">';
+      if (l.type) html += '<span class="badge badge-outline">' + l.type + '</span>';
+      html += l.website ? '<span class="badge badge-success">Tiene sitio web</span>' : '<span class="badge badge-destructive">Sin sitio web</span>';
+      html += '<span class="badge ' + (l.status === 'OPERATIONAL' ? 'badge-success' : 'badge-destructive') + '">' + l.status.replace(/_/g, ' ').toLowerCase() + '</span>';
+      html += '</div></div>';
+
+      // Info cards
+      html += '<div class="detail-grid">';
+      if (l.phone) html += '<div class="info-card"><div class="label">Telefono</div><div class="val">' + l.phone + '</div></div>';
+      if (l.website) html += '<div class="info-card"><div class="label">Sitio web</div><div class="val"><a href="' + l.website + '" target="_blank" rel="noopener">' + l.website + '</a></div></div>';
+      if (l.rating) html += '<div class="info-card"><div class="label">Rating</div><div class="val"><span style="color:var(--warning)">' + stars(l.rating) + '</span> ' + l.rating + ' <span style="color:var(--muted-foreground);font-size:0.75rem">(' + l.ratingCount + ' reviews)</span></div></div>';
+      if (l.mapsUrl) html += '<div class="info-card"><div class="label">Google Maps</div><div class="val"><a href="' + l.mapsUrl + '" target="_blank" rel="noopener">Abrir en Maps</a></div></div>';
+      if (l.editorial) html += '<div class="info-card" style="grid-column:1/-1"><div class="label">Resumen</div><div class="val" style="color:var(--muted-foreground)">' + l.editorial + '</div></div>';
+      html += '</div>';
+
+      // Photos
+      if (l.photos.length) {
+        html += '<div class="section"><div class="section-header">Fotos (' + l.photos.length + ')</div><div class="section-body"><div class="photo-grid">';
+        l.photos.forEach(u => { html += '<img src="' + u + '" loading="lazy" alt="Foto">'; });
+        html += '</div></div></div>';
+      }
+
+      // Hours
+      if (l.hours.length) {
+        html += '<div class="section"><div class="section-header">Horarios</div><div class="section-body"><div class="hours-list">';
+        l.hours.forEach(h => { html += h + '<br>'; });
+        html += '</div></div></div>';
+      }
+
+      // Reviews
+      if (l.reviews.length) {
+        html += '<div class="section"><div class="section-header">Reviews (' + l.reviews.length + ')</div><div class="section-body">';
+        l.reviews.forEach(r => {
+          html += '<div class="review-item"><div class="review-meta"><span class="review-stars">' + stars(r.rating) + '</span><span class="review-author">' + r.author + '</span><span class="review-time">' + r.time + '</span></div>';
+          if (r.text) html += '<div class="review-text">' + r.text + '</div>';
+          html += '</div>';
+        });
+        html += '</div></div>';
+      }
+
+      document.getElementById('detailContent').innerHTML = html;
+      window.scrollTo(0, 0);
+    }
+
+    function hideDetail() {
+      document.getElementById('detailView').style.display = 'none';
+      document.getElementById('listView').style.display = 'block';
+      document.getElementById('statsBar').style.display = 'grid';
+    }
+
+    // CSV export
+    function exportCSV() {
+      const h = ['#','Nombre','Direccion','Telefono','Sitio Web','Rating'];
+      const rows = getRows().filter(r => r.style.display !== 'none');
+      const csv = [h.join(',')];
+      rows.forEach(r => {
+        const idx = parseInt(r.dataset.idx);
+        const l = LEADS[idx];
+        csv.push([idx+1, '"'+l.name+'"', '"'+l.address+'"', '"'+l.phone+'"', '"'+l.website+'"', l.rating || ''].join(','));
+      });
+      const blob = new Blob(['\uFEFF' + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const u = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = u; a.download = 'leads.csv'; a.click();
+      URL.revokeObjectURL(u);
+    }
+
+    setFilter('all');
+  </script>
+</body>
+</html>
