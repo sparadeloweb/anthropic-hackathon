@@ -82,15 +82,15 @@ Claude will ask for search query, filter preference, and search depth before run
 
 ### `/design-generating-websites`
 
-Generates professional website designs in [Google Stitch](https://stitch.withgoogle.com) for scraped leads. Creates one Stitch project per lead with a tailored design system and 5 screens (Landing, About, Services, Reviews, Contact) built from the lead's actual data.
+Generates a website design in [Google Stitch](https://stitch.withgoogle.com) for **one lead at a time**. Asks design preferences interactively before generating, downloads screenshots locally.
 
 **Features:**
-- Processes single leads, custom selections, or all leads without a website
-- Asks for project type: **Single Page** (landing), **Multi Page** (website with nav), or **App** (mobile native screens)
-- Asks for platform: Desktop, Mobile-first, App (iOS/Android), Tablet
-- Analyzes photos, reviews, hours, and business type to inform design direction
-- Creates design systems with appropriate typography, colors, and roundness per business type
-- Generates screens with data-driven prompts using real lead data
+- One lead per run (invoke again for another lead)
+- Interactive preferences before generation: project type, platform, colors, color mode, style tone, custom requests
+- Project types: **Single Page** (landing), **Multi Page** (website with nav), or **App** (mobile screens)
+- Platforms: Desktop, Mobile-first, App (iOS/Android)
+- Analyzes photos, reviews, hours, and business type to suggest palette and typography
+- Downloads all screenshots to `./stitch_designs/lead-name-slug/`
 - Follows premium UI/UX principles from [ui-ux-pro-max](https://skills.sh/kimny1143/claude-code-template/ui-ux-pro-max) and [frontend-design](https://skills.sh/anthropics/skills/frontend-design)
 
 **Usage:**

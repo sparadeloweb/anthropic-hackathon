@@ -82,15 +82,15 @@ Claude preguntara por la consulta de busqueda, preferencia de filtro y profundid
 
 ### `/design-generating-websites`
 
-Genera disenos de sitios web profesionales en [Google Stitch](https://stitch.withgoogle.com) para leads scrapeados. Crea un proyecto Stitch por lead con design system personalizado y 5 pantallas (Landing, About, Services, Reviews, Contact) construidas con los datos reales del lead.
+Genera un diseno de sitio web en [Google Stitch](https://stitch.withgoogle.com) para **un lead a la vez**. Pregunta preferencias de diseno interactivamente antes de generar, descarga screenshots localmente.
 
 **Funcionalidades:**
-- Procesa leads individuales, selecciones personalizadas, o todos los leads sin web
-- Pregunta tipo de proyecto: **Single Page** (landing), **Multi Page** (sitio con navegacion), o **App** (pantallas nativas mobile)
-- Pregunta plataforma: Desktop, Mobile-first, App (iOS/Android), Tablet
-- Analiza fotos, reviews, horarios y tipo de negocio para definir la direccion de diseno
-- Crea design systems con tipografia, colores y bordes apropiados por tipo de negocio
-- Genera pantallas con prompts basados en datos reales del lead
+- Un lead por ejecucion (invocar de nuevo para otro lead)
+- Preferencias interactivas antes de generar: tipo de proyecto, plataforma, colores, modo de color, tono, pedidos especiales
+- Tipos de proyecto: **Single Page** (landing), **Multi Page** (sitio con navegacion), o **App** (pantallas mobile)
+- Plataformas: Desktop, Mobile-first, App (iOS/Android)
+- Analiza fotos, reviews, horarios y tipo de negocio para sugerir paleta y tipografia
+- Descarga todas las screenshots a `./stitch_designs/lead-name-slug/`
 - Sigue principios de UI/UX premium de [ui-ux-pro-max](https://skills.sh/kimny1143/claude-code-template/ui-ux-pro-max) y [frontend-design](https://skills.sh/anthropics/skills/frontend-design)
 
 **Uso:**

@@ -12,6 +12,9 @@ venv/
 # Leads output
 leads/
 
+# Stitch design output
+stitch_designs/
+
 # OS
 .DS_Store
 Thumbs.db
