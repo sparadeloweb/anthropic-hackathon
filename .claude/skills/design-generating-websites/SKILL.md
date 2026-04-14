@@ -26,9 +26,11 @@ Design Generation Progress:
 - [ ] Step 5: Review and iterate
 ```
 
-### Step 1: Select leads to design for
+### Step 1: Select leads and project type
 
-Ask the user which leads to process. Options:
+**1a. Select leads:**
+
+Ask the user which leads to process:
 
 1. **Single lead** — user picks one by name from the JSON
 2. **Custom selection** — user provides a list of names or indices
@@ -47,6 +49,23 @@ for i, l in enumerate(data):
     print(f'{i}: {l[\"displayName\"][\"text\"]} | {web} | rating: {l.get(\"rating\",\"-\")}')
 " ./leads/YYYY-MM-DD/query-slug/leads_data.json
 ```
+
+**1b. Project type — ask explicitly:**
+
+| Option | Description |
+|---|---|
+| **Single Page (Landing)** | One long scrollable page with all sections (hero, services, reviews, contact) as anchored blocks |
+| **Multi Page (Website)** | Separate screens per section + a home page with navigation linking to each page |
+| **App (Mobile)** | Mobile-first app screens: onboarding, home feed, profile, booking/contact |
+
+**1c. Platform — ask explicitly:**
+
+| Option | Device Type | Notes |
+|---|---|---|
+| **Web Desktop** | `DESKTOP` | Standard website, generates mobile variant too |
+| **Web Mobile-first** | `MOBILE` | Mobile-first, generates desktop variant too |
+| **App iOS/Android** | `MOBILE` | Native app screens, no desktop variant |
+| **Tablet** | `TABLET` | Tablet-optimized layout |
 
 ### Step 2: Analyze lead data and define design direction
 
@@ -102,33 +121,54 @@ Generate screens using `generate_screen_from_text` with rich, detailed prompts b
 
 See [SCREEN-PROMPTS.md](SCREEN-PROMPTS.md) for prompt templates per screen type.
 
-**Screens to generate (in order):**
+**Choose screens based on the project type selected in Step 1b:**
 
-1. **Landing/Home** — hero with business name, tagline from reviews, CTA
-2. **About** — business story, team photos if available, values
-3. **Services** — based on business type and review analysis
-4. **Reviews/Testimonials** — real reviews with ratings
-5. **Contact** — address, phone, hours, embedded map placeholder
+#### Single Page (Landing)
 
-For each screen:
+Generate **1 screen** containing all sections as a long scrollable page:
+
+1. **Landing Page** — includes: hero, services preview, featured testimonial, hours, contact info, footer. All sections linked via anchor navigation at the top.
+
+#### Multi Page (Website)
+
+Generate **5+ screens** with a navigation bar linking between them:
+
+1. **Home** — hero + services preview + testimonial + CTA. Navigation bar with links to: Nosotros, Servicios, Opiniones, Contacto
+2. **About (Nosotros)** — business story, values, team/gallery
+3. **Services (Servicios)** — detailed services grid
+4. **Reviews (Opiniones)** — real reviews with ratings
+5. **Contact (Contacto)** — address, phone, hours, map, contact form
+
+Every screen must include the same navigation bar and footer for consistency.
+
+#### App (Mobile)
+
+Generate **4-6 screens** as a native mobile app flow:
+
+1. **Splash / Onboarding** — logo, tagline, "Comenzar" button
+2. **Home Feed** — business overview, quick actions, featured info
+3. **Services / Menu** — scrollable list or grid of services
+4. **Reviews** — review cards with swipe or scroll
+5. **Profile / Contact** — business info, hours, map, call button
+6. **Booking / Appointment** (if applicable) — form to schedule
+
+Use mobile-native patterns: bottom tab bar, sticky headers, card-based layouts.
+
+---
+
+**For each screen**, call:
 ```
 mcp__stitch__generate_screen_from_text({
   projectId: "PROJECT_ID",
   prompt: "detailed prompt from template...",
-  deviceType: "DESKTOP",
+  deviceType: DEVICE_TYPE_FROM_STEP_1C,
   modelId: "GEMINI_3_1_PRO"
 })
 ```
 
-After generating desktop, generate mobile variants:
-```
-mcp__stitch__generate_screen_from_text({
-  projectId: "PROJECT_ID",
-  prompt: "same prompt adapted for mobile...",
-  deviceType: "MOBILE",
-  modelId: "GEMINI_3_1_PRO"
-})
-```
+**Then generate the responsive variant** (skip if App type):
+- If primary is DESKTOP → generate MOBILE variant
+- If primary is MOBILE (web) → generate DESKTOP variant
 
 **After all screens are generated**, apply the design system:
 ```
