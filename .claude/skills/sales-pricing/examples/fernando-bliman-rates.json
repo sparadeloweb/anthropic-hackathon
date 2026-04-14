@@ -1,0 +1,14 @@
+{
+  "client": "Fernando Bliman - Asesor Legal y Consultor de Negocios",
+  "client_slug": "fernando-bliman-asesor-legal",
+  "project": "Website institucional",
+  "currency": "USD",
+  "hourly_rates": {
+    "backend": 55,
+    "frontend": 50,
+    "architecture": 70,
+    "design": 45,
+    "project_management": 50,
+    "product_owner": 60
+  }
+}

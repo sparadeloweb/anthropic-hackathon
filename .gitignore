@@ -20,6 +20,8 @@ venv/
 leads/
 stitch_designs/
 roadmaps/
+budgets/
+proposals/
 
 # ── Env / Secrets ─────────────────────────────────────────────────────────────
 .env

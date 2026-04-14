@@ -158,6 +158,104 @@ Claude will ask whether you want to estimate a new project or add a feature to a
 
 **Requires:** Python 3.10+, `uv` (dependencies installed on-demand).
 
+### `/sales-proposal`
+
+Generates a professional sales proposal for a lead by combining Stitch design, roadmap, and business data. Produces a ready-to-send message tailored to the client's business type and language.
+
+**Features:**
+- Combines three data sources: Stitch design, roadmap estimate, and lead business data
+- Auto-detects language from lead location (Spanish, English, Portuguese), asks for confirmation
+- Professional but approachable tone — sells results, not technology
+- Includes: business-specific opening, design overview, execution timeline, call to action
+- Excludes: prices, internal team names, technical jargon, hour breakdowns
+- Output follows same folder pattern as `stitch_designs/` and `roadmaps/`
+
+**Usage:**
+```
+/sales-proposal
+```
+
+Claude will list leads that have both a Stitch design and a roadmap, ask which one, confirm language, and generate the proposal.
+
+**Structure:**
+```
+.claude/skills/sales-proposal/
+└── SKILL.md              # Main workflow (7 steps)
+# Output goes to <repo_root>/proposals/<lead_slug>/propuesta.txt
+```
+
+### `/sales-proposal-web`
+
+Generates a self-contained HTML dashboard that consolidates all pipeline outputs for a lead into a single interactive presentation with tabs: business info, Stitch design, proposal, budget, and roadmap.
+
+**Features:**
+- Combines 5 data sources: Google Places lead, Stitch design, roadmap, budget, proposal
+- Auto-detects language from lead country (Spanish, English, Portuguese)
+- Dark modern dashboard with tabbed navigation
+- Stitch screenshots embedded in base64 (fully self-contained, shareable)
+- Single HTML file — no dependencies, opens in any browser
+- Prerequisite checker: shows which pipeline steps are missing
+
+**Usage:**
+```
+/sales-proposal-web
+```
+
+Claude will list leads that have all prerequisites, generate the dashboard, and output the file path.
+
+**Structure:**
+```
+.claude/skills/sales-proposal-web/
+├── SKILL.md                          # Main workflow
+└── scripts/
+    └── build_dashboard.py            # Dashboard generator
+# Output goes to <repo_root>/proposals/<lead_slug>/dashboard.html
+```
+
+**Requires:** Python 3.10+. All pipeline steps must be completed for the lead first.
+
+### `/sales-pricing`
+
+Generates client-ready commercial budgets from roadmaps. Reads a roadmap, extracts hours by role, applies per-role hourly rates, and produces a budget with total investment breakdown.
+
+**Features:**
+- Reads roadmaps from `/sales-roadmap` automatically
+- Maps Spanish role names to canonical commercial roles (Backend, Frontend, Architecture, Design, PM, PO)
+- Supports project-mode and feature-mode roadmaps
+- Outputs Markdown + PDF with consistent styling
+
+**Usage:**
+```
+/sales-pricing
+```
+
+**Structure:**
+```
+.claude/skills/sales-pricing/
+├── SKILL.md                  # Main workflow
+├── scripts/
+│   ├── pricing.py            # Entry point
+│   ├── parser.py             # Roadmap parser
+│   └── render.py             # Budget renderer
+└── examples/
+    └── sample-rates.json     # Example input
+# Output goes to <repo_root>/budgets/<client_slug>/
+```
+
+### `/agency-demo`
+
+Runs the complete agencIA pipeline end-to-end as a demonstration. Picks a random industry and country, searches for leads, generates design, roadmap, budget, proposal, and dashboard. Creates `CLAUDE.md` with full pipeline documentation on success.
+
+**Usage:**
+```
+/agency-demo
+```
+
+**Pipeline executed:**
+```
+Lead Search → Design (Stitch) → Roadmap → Budget → Proposal → Dashboard Web
+```
+
 ### `/dev-from-design-to-code`
 
 Converts Stitch designs into production code: Next.js (React) frontend with optional Laravel API backend. Asks if backend is needed, scaffolds the project, splits designs into minimum components, writes Playwright + Pest tests, installs all dependencies, starts dev server with optional public tunnel, and documents everything in Notion.

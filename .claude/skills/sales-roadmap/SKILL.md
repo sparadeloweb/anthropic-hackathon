@@ -1,5 +1,6 @@
 ---
 name: sales-roadmap
+model: sonnet
 description: Estimación de tiempos y armado de roadmap para proyectos de desarrollo de producto. Úsala cuando el usuario pida estimar un proyecto, armar un roadmap para un cliente, calcular cuánto tarda un desarrollo en base a páginas/features/integraciones, o planificar la asignación del equipo. Cruza los requerimientos contra la nómina real del estudio y las asignaciones vigentes para producir un cronograma tipo Gantt con personas asignadas por nombre.
 ---
 
