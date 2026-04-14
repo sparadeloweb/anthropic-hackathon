@@ -1,0 +1,4 @@
+horas_por_dia: 8
+productividad: 0.75
+dias_laborables: [1, 2, 3, 4, 5]  # 1=lunes ... 7=domingo (ISO)
+pais_feriados: AR

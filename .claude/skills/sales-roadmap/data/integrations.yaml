@@ -1,0 +1,62 @@
+# Catálogo de integraciones con servicios de terceros.
+
+- id: integration.stripe
+  nombre: "Integración con Stripe (pagos)"
+  tareas:
+    - { id: arquitectura.system_design_module, cantidad: 1 }
+    - { id: arquitectura.security_review, cantidad: 1 }
+    - { id: backend.third_party_api_client, cantidad: 1 }
+    - { id: backend.webhook_handler, cantidad: 2 }
+    - { id: backend.crud_endpoint, cantidad: 3 }
+    - { id: frontend.form_with_validation, cantidad: 1 }
+
+- id: integration.mercadopago
+  nombre: "Integración con MercadoPago"
+  tareas:
+    - { id: arquitectura.system_design_module, cantidad: 1 }
+    - { id: arquitectura.security_review, cantidad: 1 }
+    - { id: backend.third_party_api_client, cantidad: 1 }
+    - { id: backend.webhook_handler, cantidad: 2 }
+    - { id: backend.crud_endpoint, cantidad: 3 }
+    - { id: frontend.form_with_validation, cantidad: 1 }
+
+- id: integration.sendgrid
+  nombre: "Integración con SendGrid (emails)"
+  tareas:
+    - { id: backend.third_party_api_client, cantidad: 1 }
+    - { id: backend.crud_endpoint, cantidad: 1 }
+
+- id: integration.twilio
+  nombre: "Integración con Twilio (SMS/WhatsApp)"
+  tareas:
+    - { id: backend.third_party_api_client, cantidad: 1 }
+    - { id: backend.webhook_handler, cantidad: 1 }
+    - { id: backend.crud_endpoint, cantidad: 2 }
+
+- id: integration.auth0
+  nombre: "Integración con Auth0"
+  tareas:
+    - { id: arquitectura.security_review, cantidad: 1 }
+    - { id: backend.auth_setup, cantidad: 1 }
+    - { id: backend.third_party_api_client, cantidad: 1 }
+    - { id: frontend.form_with_validation, cantidad: 1 }
+
+- id: integration.google_oauth
+  nombre: "Google OAuth / Social login"
+  tareas:
+    - { id: backend.auth_setup, cantidad: 1 }
+    - { id: backend.third_party_api_client, cantidad: 1 }
+    - { id: frontend.form_with_validation, cantidad: 1 }
+
+- id: integration.aws_s3
+  nombre: "Integración con AWS S3 (storage)"
+  tareas:
+    - { id: arquitectura.infra_setup, cantidad: 1 }
+    - { id: backend.third_party_api_client, cantidad: 1 }
+    - { id: backend.crud_endpoint, cantidad: 2 }
+
+- id: integration.analytics
+  nombre: "Integración con Google Analytics / Mixpanel"
+  tareas:
+    - { id: frontend.component_library_adapt, cantidad: 1 }
+    - { id: backend.third_party_api_client, cantidad: 1 }

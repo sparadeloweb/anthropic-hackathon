@@ -1,0 +1,24 @@
+{
+  "cliente": "Clínica San Martín",
+  "proyecto": "SaaS de gestión de turnos",
+  "fecha_inicio_deseada": "2026-05-04",
+  "paginas": [
+    { "id": "page.login", "dificultad": "baja", "cantidad": 1 },
+    { "id": "page.register", "dificultad": "baja", "cantidad": 1 },
+    { "id": "page.password_recovery", "dificultad": "baja", "cantidad": 1 },
+    { "id": "page.dashboard_advanced", "dificultad": "media", "cantidad": 1 },
+    { "id": "page.list_view", "dificultad": "media", "cantidad": 2 },
+    { "id": "page.detail_view", "dificultad": "media", "cantidad": 2 },
+    { "id": "page.settings", "dificultad": "baja", "cantidad": 1 }
+  ],
+  "features": [
+    { "id": "feature.notifications", "dificultad": "media", "cantidad": 1 },
+    { "id": "feature.roles_permissions", "dificultad": "media", "cantidad": 1 },
+    { "id": "feature.admin_panel", "dificultad": "media", "cantidad": 1 }
+  ],
+  "integraciones": [
+    { "id": "integration.mercadopago", "dificultad": "alta", "cantidad": 1 },
+    { "id": "integration.sendgrid", "dificultad": "baja", "cantidad": 1 },
+    { "id": "integration.google_oauth", "dificultad": "baja", "cantidad": 1 }
+  ]
+}

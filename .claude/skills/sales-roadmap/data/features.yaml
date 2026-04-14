@@ -1,0 +1,86 @@
+# Catálogo de features típicas.
+
+- id: feature.notifications
+  nombre: "Sistema de notificaciones in-app"
+  tareas:
+    - { id: arquitectura.system_design_module, cantidad: 1 }
+    - { id: backend.crud_endpoint, cantidad: 3 }
+    - { id: backend.background_job, cantidad: 1 }
+    - { id: frontend.standard_screen, cantidad: 1 }
+    - { id: frontend.realtime_integration, cantidad: 1 }
+
+- id: feature.search
+  nombre: "Búsqueda global"
+  tareas:
+    - { id: arquitectura.system_design_module, cantidad: 1 }
+    - { id: backend.complex_business_logic, cantidad: 1 }
+    - { id: backend.crud_endpoint, cantidad: 2 }
+    - { id: frontend.form_with_validation, cantidad: 1 }
+    - { id: frontend.data_table, cantidad: 1 }
+
+- id: feature.file_upload
+  nombre: "Subida de archivos"
+  tareas:
+    - { id: arquitectura.system_design_module, cantidad: 1 }
+    - { id: backend.crud_endpoint, cantidad: 2 }
+    - { id: backend.third_party_api_client, cantidad: 1 }
+    - { id: frontend.form_with_validation, cantidad: 1 }
+
+- id: feature.roles_permissions
+  nombre: "Roles y permisos"
+  tareas:
+    - { id: arquitectura.system_design_module, cantidad: 1 }
+    - { id: arquitectura.data_model, cantidad: 1 }
+    - { id: backend.auth_setup, cantidad: 1 }
+    - { id: backend.crud_endpoint, cantidad: 4 }
+    - { id: frontend.form_with_validation, cantidad: 2 }
+
+- id: feature.export_import
+  nombre: "Export/Import CSV o Excel"
+  tareas:
+    - { id: backend.complex_business_logic, cantidad: 1 }
+    - { id: backend.background_job, cantidad: 1 }
+    - { id: frontend.form_with_validation, cantidad: 1 }
+
+- id: feature.audit_log
+  nombre: "Log de auditoría"
+  tareas:
+    - { id: arquitectura.data_model, cantidad: 1 }
+    - { id: backend.crud_endpoint, cantidad: 2 }
+    - { id: backend.complex_business_logic, cantidad: 1 }
+    - { id: frontend.data_table, cantidad: 1 }
+
+- id: feature.multi_tenant
+  nombre: "Multi-tenancy"
+  tareas:
+    - { id: arquitectura.system_design_module, cantidad: 2 }
+    - { id: arquitectura.data_model, cantidad: 1 }
+    - { id: arquitectura.security_review, cantidad: 1 }
+    - { id: backend.complex_business_logic, cantidad: 2 }
+    - { id: backend.db_migration, cantidad: 2 }
+
+- id: feature.realtime_chat
+  nombre: "Chat en tiempo real"
+  tareas:
+    - { id: arquitectura.system_design_module, cantidad: 1 }
+    - { id: backend.complex_business_logic, cantidad: 1 }
+    - { id: backend.crud_endpoint, cantidad: 3 }
+    - { id: frontend.realtime_integration, cantidad: 1 }
+    - { id: frontend.standard_screen, cantidad: 2 }
+
+- id: feature.analytics_dashboard
+  nombre: "Dashboard de analytics interno"
+  tareas:
+    - { id: arquitectura.data_model, cantidad: 1 }
+    - { id: backend.complex_business_logic, cantidad: 1 }
+    - { id: backend.crud_endpoint, cantidad: 4 }
+    - { id: frontend.chart_or_visualization, cantidad: 5 }
+    - { id: frontend.data_table, cantidad: 1 }
+
+- id: feature.admin_panel
+  nombre: "Panel de administración"
+  tareas:
+    - { id: design.screen_mockup, cantidad: 4 }
+    - { id: frontend.data_table, cantidad: 3 }
+    - { id: frontend.form_with_validation, cantidad: 3 }
+    - { id: backend.crud_endpoint, cantidad: 8 }

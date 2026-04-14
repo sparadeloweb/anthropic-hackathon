@@ -1,0 +1,117 @@
+# Tareas atómicas por departamento. horas_base está "en Semi" (dificultad Baja, seniority Semi).
+# Se multiplica por dificultad en el elemento de alto nivel, y se divide por multiplicador_seniority
+# cuando se asigna a una persona concreta.
+
+# ---------------- Discovery ----------------
+- id: discovery.user_interview_cycle
+  nombre: "Ciclo de entrevistas con usuarios"
+  departamento: Discovery
+  horas_base: 10
+- id: discovery.market_research
+  nombre: "Investigación de mercado"
+  departamento: Discovery
+  horas_base: 8
+- id: discovery.requirements_doc
+  nombre: "Documento de requerimientos"
+  departamento: Discovery
+  horas_base: 6
+- id: discovery.workshop_kickoff
+  nombre: "Workshop de kickoff con el cliente"
+  departamento: Discovery
+  horas_base: 6
+
+# ---------------- Diseño ----------------
+- id: design.screen_mockup
+  nombre: "Mockup de pantalla"
+  departamento: Diseño
+  horas_base: 4
+- id: design.design_system_base
+  nombre: "Design system base (tokens + componentes)"
+  departamento: Diseño
+  horas_base: 16
+- id: design.prototype_interactive
+  nombre: "Prototipo interactivo"
+  departamento: Diseño
+  horas_base: 6
+- id: design.usability_review
+  nombre: "Review de usabilidad"
+  departamento: Diseño
+  horas_base: 3
+
+# ---------------- Arquitectura ----------------
+- id: arquitectura.system_design_module
+  nombre: "Diseño de módulo del sistema"
+  departamento: Arquitectura
+  horas_base: 6
+- id: arquitectura.data_model
+  nombre: "Modelado de datos"
+  departamento: Arquitectura
+  horas_base: 8
+- id: arquitectura.infra_setup
+  nombre: "Setup de infraestructura base"
+  departamento: Arquitectura
+  horas_base: 12
+- id: arquitectura.security_review
+  nombre: "Review de seguridad"
+  departamento: Arquitectura
+  horas_base: 4
+
+# ---------------- Backend ----------------
+- id: backend.crud_endpoint
+  nombre: "Endpoint CRUD simple"
+  departamento: Backend
+  horas_base: 4
+- id: backend.auth_setup
+  nombre: "Setup de autenticación"
+  departamento: Backend
+  horas_base: 12
+- id: backend.webhook_handler
+  nombre: "Handler de webhook"
+  departamento: Backend
+  horas_base: 6
+- id: backend.third_party_api_client
+  nombre: "Cliente de API de terceros"
+  departamento: Backend
+  horas_base: 8
+- id: backend.background_job
+  nombre: "Job en background / cron"
+  departamento: Backend
+  horas_base: 5
+- id: backend.complex_business_logic
+  nombre: "Lógica de negocio compleja"
+  departamento: Backend
+  horas_base: 10
+- id: backend.db_migration
+  nombre: "Migración de base de datos"
+  departamento: Backend
+  horas_base: 3
+
+# ---------------- Frontend ----------------
+- id: frontend.standard_screen
+  nombre: "Pantalla estándar (solo lectura)"
+  departamento: Frontend
+  horas_base: 6
+- id: frontend.form_with_validation
+  nombre: "Formulario con validaciones"
+  departamento: Frontend
+  horas_base: 8
+- id: frontend.data_table
+  nombre: "Tabla de datos con filtros/paginación"
+  departamento: Frontend
+  horas_base: 10
+- id: frontend.chart_or_visualization
+  nombre: "Gráfico o visualización"
+  departamento: Frontend
+  horas_base: 6
+- id: frontend.realtime_integration
+  nombre: "Integración realtime (websocket/SSE)"
+  departamento: Frontend
+  horas_base: 10
+- id: frontend.state_management_setup
+  nombre: "Setup de state management"
+  departamento: Frontend
+  horas_base: 6
+- id: frontend.component_library_adapt
+  nombre: "Adaptación de librería de componentes"
+  departamento: Frontend
+  horas_base: 4

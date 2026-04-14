@@ -1,0 +1,55 @@
+# Nómina del estudio. Editar a mano al incorporar/desvincular personas.
+
+- id: emp.001
+  nombre: "Ana Pérez"
+  departamento: Backend
+  seniority: senior
+  dedicacion_default: 1.0
+
+- id: emp.002
+  nombre: "Luis Gómez"
+  departamento: Backend
+  seniority: semi
+  dedicacion_default: 1.0
+
+- id: emp.003
+  nombre: "Tomás Ibarra"
+  departamento: Backend
+  seniority: junior
+  dedicacion_default: 1.0
+
+- id: emp.004
+  nombre: "Sofía Martín"
+  departamento: Frontend
+  seniority: senior
+  dedicacion_default: 1.0
+
+- id: emp.005
+  nombre: "Nicolás Díaz"
+  departamento: Frontend
+  seniority: semi
+  dedicacion_default: 1.0
+
+- id: emp.006
+  nombre: "María Ruiz"
+  departamento: Diseño
+  seniority: senior
+  dedicacion_default: 0.5
+
+- id: emp.007
+  nombre: "Julieta Álvarez"
+  departamento: Diseño
+  seniority: semi
+  dedicacion_default: 1.0
+
+- id: emp.008
+  nombre: "Federico López"
+  departamento: Arquitectura
+  seniority: senior
+  dedicacion_default: 0.5
+
+- id: emp.009
+  nombre: "Camila Torres"
+  departamento: Discovery
+  seniority: senior
+  dedicacion_default: 0.5
