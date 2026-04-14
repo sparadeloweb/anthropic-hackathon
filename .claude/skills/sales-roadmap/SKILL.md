@@ -38,7 +38,8 @@ Usar cuando se va a estimar un proyecto completo por primera vez, típicamente a
 
 2. **El usuario elige un lead** — con el `stitch_project.json` seleccionado, extraer:
    - `leadName` → campo `cliente` del input
-   - `screens[]` → mapear cada pantalla a un `page.*` del catálogo (`data/pages.yaml`). Usar este mapeo orientativo:
+   - Nombre de la carpeta de `stitch_designs/` → campo `cliente_slug` del input (para que la carpeta de `roadmaps/` coincida exactamente)
+   - `screens[]` → mapear **cada pantalla del diseño** a un `page.*` del catálogo (`data/pages.yaml`). El roadmap debe reflejar **únicamente** lo que existe en el diseño de Stitch — no agregar páginas, features ni integraciones que no estén en el mockup. Usar este mapeo orientativo:
      - home / landing → `page.landing`
      - login → `page.login`
      - register → `page.register`
@@ -53,12 +54,12 @@ Usar cuando se va a estimar un proyecto completo por primera vez, típicamente a
      - opiniones / reviews → `page.detail_view` (variante)
    - Si una pantalla no encaja en ningún `page.*`, preguntar al usuario.
 
-3. **Completar el input** conversando con el usuario:
-   - Nombre del proyecto (campo `proyecto`)
-   - Fecha deseada de inicio (formato `YYYY-MM-DD`)
-   - Confirmar/ajustar el mapeo de pantallas y sus dificultades
-   - Features adicionales (`data/features.yaml`)
-   - Integraciones necesarias (`data/integrations.yaml`)
+3. **Mostrar el mapeo y confirmar** con el usuario antes de seguir:
+   - Presentar la tabla de pantallas del diseño → pages del catálogo
+   - Preguntar nombre del proyecto (campo `proyecto`)
+   - Preguntar fecha deseada de inicio (formato `YYYY-MM-DD`)
+   - Confirmar/ajustar las dificultades de cada página
+   - **Solo si el usuario lo pide**, agregar features (`data/features.yaml`) o integraciones (`data/integrations.yaml`) extras que no estén en el diseño
    - (Opcional) `empleados_id` si se quiere restringir el equipo
 
 4. **Guardar el input** como `examples/<slug-del-proyecto>.json`.
@@ -68,7 +69,7 @@ Usar cuando se va a estimar un proyecto completo por primera vez, típicamente a
    cd .claude/skills/sales-roadmap
    uv run --with pyyaml --with markdown-pdf python scripts/estimate.py examples/<archivo>.json
    ```
-   Genera: `roadmaps/<cliente_slug>/<proyecto_slug>-<timestamp>.{md,pdf}`.
+   Genera: `roadmaps/<cliente_slug>/<proyecto_slug>.{md,pdf}`.
 
 6. **Mostrar el resultado** al usuario: indicarle la ruta del PDF generado y pegar el contenido del Markdown (con el Gantt Mermaid).
 
@@ -80,7 +81,7 @@ Usar cuando se va a estimar un proyecto completo por primera vez, típicamente a
 
 Usar cuando el cliente ya tiene un proyecto estimado y se quiere agregar una funcionalidad nueva. Genera un roadmap separado enfocado solo en la feature, archivado en la misma carpeta del cliente.
 
-1. **Identificar el lead/cliente** — listar las carpetas existentes en `roadmaps/` y/o `stitch_designs/` para que el usuario elija el cliente. Si el usuario ya lo mencionó, usar ese.
+1. **Identificar el lead/cliente** — listar las carpetas existentes en `roadmaps/` y/o `stitch_designs/` para que el usuario elija el cliente. Si el usuario ya lo mencionó, usar ese. Usar el nombre de la carpeta existente como campo `cliente_slug` del input para mantener la misma carpeta.
 
 2. **Recolectar los datos de la feature** conversando con el usuario:
    - Nombre de la feature (campo `feature`) — define el prefijo del archivo de salida
@@ -96,6 +97,7 @@ Usar cuando el cliente ya tiene un proyecto estimado y se quiere agregar una fun
    ```json
    {
      "cliente": "Nombre del cliente",
+     "cliente_slug": "nombre-carpeta-existente",
      "proyecto": "Nombre del proyecto original",
      "feature": "Nombre de la feature nueva",
      "fecha_inicio_deseada": "YYYY-MM-DD",
@@ -110,7 +112,7 @@ Usar cuando el cliente ya tiene un proyecto estimado y se quiere agregar una fun
    cd .claude/skills/sales-roadmap
    uv run --with pyyaml --with markdown-pdf python scripts/estimate.py examples/<archivo>.json
    ```
-   Genera: `roadmaps/<cliente_slug>/<feature_slug>-<timestamp>.{md,pdf}` (nótese que usa el nombre de la feature como prefijo, no el del proyecto).
+   Genera: `roadmaps/<cliente_slug>/<feature_slug>.{md,pdf}` (nótese que usa el nombre de la feature como prefijo, no el del proyecto).
 
 5. **Mostrar el resultado** al usuario y revisar supuestos.
 
