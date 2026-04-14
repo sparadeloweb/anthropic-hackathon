@@ -1,0 +1,14 @@
+{
+  "client": "Fernando Bliman - Legal Advisor and Business Consultant",
+  "client_slug": "fernando-bliman-asesor-legal",
+  "project": "Institutional website",
+  "feature": "Live chat with clients",
+  "desired_start_date": "2026-06-01",
+  "pages": [],
+  "features": [
+    { "id": "feature.realtime_chat", "difficulty": "medium", "quantity": 1 }
+  ],
+  "integrations": [
+    { "id": "integration.twilio", "difficulty": "medium", "quantity": 1 }
+  ]
+}

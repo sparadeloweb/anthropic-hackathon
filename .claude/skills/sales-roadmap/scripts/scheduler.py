@@ -1,5 +1,5 @@
-"""Scheduler: expande el input del proyecto, asigna personas nominales, calcula fechas
-respetando dependencias entre fases, feriados AR y corrimiento automático de inicio."""
+"""Scheduler: expands project input, assigns named people, calculates dates
+respecting phase dependencies, AR holidays, and automatic start date shifting."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -11,34 +11,34 @@ from roster import Roster
 
 @dataclass
 class TaskAssignment:
-    """Una tarea atómica asignada a una persona, con fechas concretas."""
-    elemento_id: str              # page/feature/integration al que pertenece
-    elemento_nombre: str
+    """An atomic task assigned to a person, with concrete dates."""
+    element_id: str              # page/feature/integration it belongs to
+    element_name: str
     atomic_id: str
-    atomic_nombre: str
-    departamento: str
-    fase_id: str
-    empleado_id: str
-    empleado_nombre: str
-    horas: float
-    inicio: date
-    fin: date
+    atomic_name: str
+    department: str
+    phase_id: str
+    employee_id: str
+    employee_name: str
+    hours: float
+    start: date
+    end: date
 
 
 @dataclass
 class Roadmap:
-    proyecto: str
-    fecha_inicio_deseada: date
-    fecha_inicio_efectiva: date
-    fecha_fin: date
-    corrimiento_dias: int
-    razon_corrimiento: str
-    tareas: list[TaskAssignment]
-    fases_resumen: list[dict] = field(default_factory=list)
-    horas_por_depto: dict[str, float] = field(default_factory=dict)
-    horas_por_elemento: dict[str, float] = field(default_factory=dict)
-    advertencias: list[str] = field(default_factory=list)
-    feature: str = ""  # Nombre de la feature si es un roadmap incremental
+    project: str
+    desired_start_date: date
+    effective_start_date: date
+    end_date: date
+    shift_days: int
+    shift_reason: str
+    tasks: list[TaskAssignment]
+    phases_summary: list[dict] = field(default_factory=list)
+    hours_by_dept: dict[str, float] = field(default_factory=dict)
+    hours_by_element: dict[str, float] = field(default_factory=dict)
+    warnings: list[str] = field(default_factory=list)
+    feature: str = ""  # Feature name if this is an incremental roadmap
 
 
 # ---------------- helpers ----------------
@@ -52,40 +52,40 @@ def _next_working_day(r: Roster, d: date) -> date:
 def _expand_items(
     input_items: list[dict],
     catalog_coll: dict,
-    mult_dificultad: dict,
+    mult_difficulty: dict,
 ) -> list[dict]:
-    """Expande un bloque de input (paginas/features/integraciones) a tareas atómicas
-    con horas_ideales (en escala Semi) asignadas. Devuelve lista de dicts:
-    {elemento_id, elemento_nombre, atomic_id, horas_ideales}."""
+    """Expands an input block (pages/features/integrations) into atomic tasks
+    with ideal_hours (Semi scale) assigned. Returns list of dicts:
+    {element_id, element_name, atomic_id, ideal_hours}."""
     expanded = []
     for it in input_items:
         if it["id"] not in catalog_coll:
-            raise ValueError(f"Elemento desconocido: {it['id']}")
+            raise ValueError(f"Unknown element: {it['id']}")
         elem = catalog_coll[it["id"]]
-        dif = it.get("dificultad", "media")
-        if dif not in mult_dificultad:
-            raise ValueError(f"Dificultad inválida: {dif}")
-        mdif = mult_dificultad[dif]
-        cant_elem = it.get("cantidad", 1)
-        for t in elem.tareas:
-            horas = t.get("cantidad", 1) * mdif * cant_elem
+        dif = it.get("difficulty", "medium")
+        if dif not in mult_difficulty:
+            raise ValueError(f"Invalid difficulty: {dif}")
+        mdif = mult_difficulty[dif]
+        qty_elem = it.get("quantity", 1)
+        for t in elem.tasks:
+            hours = t.get("quantity", 1) * mdif * qty_elem
             expanded.append(
                 {
-                    "elemento_id": elem.id,
-                    "elemento_nombre": elem.nombre,
+                    "element_id": elem.id,
+                    "element_name": elem.name,
                     "atomic_id": t["id"],
-                    "horas_ideales_por_unidad": horas,
+                    "ideal_hours_per_unit": hours,
                 }
             )
     return expanded
 
 
-def _dept_capacity_in_window(r: Roster, dept: str, desde: date, dias: int, emp_ids: set[str]) -> float:
-    """Suma horas efectivas disponibles del depto en una ventana."""
+def _dept_capacity_in_window(r: Roster, dept: str, from_date: date, days: int, emp_ids: set[str]) -> float:
+    """Sum effective available hours for a department in a window."""
     total = 0.0
-    d = desde
+    d = from_date
     count = 0
-    while count < dias:
+    while count < days:
         for e in r.employees_by_dept(dept):
             if e.id in emp_ids:
                 total += r.effective_hours(e.id, d)
@@ -94,122 +94,122 @@ def _dept_capacity_in_window(r: Roster, dept: str, desde: date, dias: int, emp_i
     return total
 
 
-def _find_shift_start(r: Roster, depto_inicial: str, fecha_base: date, emp_ids: set[str]) -> tuple[date, str]:
-    """Busca la primera fecha con capacidad razonable en el depto de la fase inicial.
-    Criterio: al menos una persona del depto con disponibilidad >= 50% de su capacidad."""
-    d = _next_working_day(r, fecha_base)
+def _find_shift_start(r: Roster, initial_dept: str, base_date: date, emp_ids: set[str]) -> tuple[date, str]:
+    """Finds the first date with reasonable capacity in the initial phase department.
+    Criterion: at least one person in the department with availability >= 50% of their capacity."""
+    d = _next_working_day(r, base_date)
     limit = d + timedelta(days=365)
     while d <= limit:
         if r.is_working_day(d):
-            for emp in r.employees_by_dept(depto_inicial):
+            for emp in r.employees_by_dept(initial_dept):
                 if emp.id not in emp_ids:
                     continue
-                libre_frac = emp.dedicacion_default - r.allocated_on(emp.id, d)
-                if libre_frac >= 0.5:
-                    if d == fecha_base:
+                free_frac = emp.default_allocation - r.allocated_on(emp.id, d)
+                if free_frac >= 0.5:
+                    if d == base_date:
                         return d, ""
                     return d, (
-                        f"La fecha deseada {fecha_base.isoformat()} no tiene capacidad suficiente "
-                        f"en {depto_inicial}. Primera fecha con al menos una persona libre al 50%: "
+                        f"The desired date {base_date.isoformat()} does not have sufficient capacity "
+                        f"in {initial_dept}. First date with at least one person free at 50%: "
                         f"{d.isoformat()}."
                     )
         d += timedelta(days=1)
     raise RuntimeError(
-        f"No se encontró capacidad en {depto_inicial} en el próximo año. "
-        f"Revisar roster y allocations."
+        f"No capacity found in {initial_dept} within the next year. "
+        f"Review roster and allocations."
     )
 
 
 def _assign_phase(
     r: Roster,
-    fase: dict,
-    horas_por_depto_ideales: dict[str, float],
-    tareas_ideales: list[dict],  # tareas expandidas del input filtradas por esta fase
+    phase: dict,
+    hours_by_dept_ideal: dict[str, float],
+    ideal_tasks: list[dict],  # expanded input tasks filtered for this phase
     catalog: Catalog,
     emp_ids: set[str],
-    fecha_desde: date,
+    from_date: date,
 ) -> tuple[list[TaskAssignment], date]:
-    """Asigna las tareas de una fase a personas y devuelve la fecha_fin de la fase.
-    Cada depto de la fase corre en paralelo; la fase termina cuando el más lento termina."""
+    """Assigns tasks of a phase to people and returns the phase end date.
+    Each department in the phase runs in parallel; the phase ends when the slowest finishes."""
     assignments: list[TaskAssignment] = []
-    fase_fin = fecha_desde
+    phase_end = from_date
 
-    for depto in fase["departamentos"]:
-        candidates = [e for e in r.employees_by_dept(depto) if e.id in emp_ids]
+    for dept in phase["departments"]:
+        candidates = [e for e in r.employees_by_dept(dept) if e.id in emp_ids]
         if not candidates:
-            # depto sin personal: registrar con fecha fecha_desde si no hay horas
-            if horas_por_depto_ideales.get(depto, 0) > 0:
+            # Department without staff: register with from_date if no hours
+            if hours_by_dept_ideal.get(dept, 0) > 0:
                 raise RuntimeError(
-                    f"Fase '{fase['id']}' requiere {depto} pero no hay empleados disponibles."
+                    f"Phase '{phase['id']}' requires {dept} but no employees are available."
                 )
             continue
 
-        # Tareas ideales que caen en este depto
-        tareas_depto = [
-            t for t in tareas_ideales
-            if catalog.atomic[t["atomic_id"]].departamento == depto
+        # Ideal tasks that fall in this department
+        dept_tasks = [
+            t for t in ideal_tasks
+            if catalog.atomic[t["atomic_id"]].department == dept
         ]
-        # Ordenar: tareas más grandes primero (mejor balance)
-        tareas_depto.sort(key=lambda t: -t["horas_ideales_total"])
+        # Sort: largest tasks first (better balance)
+        dept_tasks.sort(key=lambda t: -t["ideal_hours_total"])
 
-        # Seniority-aware scheduling: para cada tarea, elegir la persona con más horas libres
-        # en los próximos días y llenar día a día.
-        depto_fin = fecha_desde
-        for t in tareas_depto:
-            horas_ideales = t["horas_ideales_total"]
+        # Seniority-aware scheduling: for each task, pick the person with the most free hours
+        # in the next days and fill day by day.
+        dept_end = from_date
+        for t in dept_tasks:
+            ideal_hours = t["ideal_hours_total"]
             atomic = catalog.atomic[t["atomic_id"]]
 
-            # Elegir persona con mejor "score" inmediato: quien pueda cubrir más rápido
-            # (más horas libres efectivas en los próximos ~20 días hábiles)
-            persona = _pick_person(r, candidates, fecha_desde, 20)
+            # Pick person with best immediate "score": whoever can cover it fastest
+            # (most free effective hours in the next ~20 working days)
+            person = _pick_person(r, candidates, from_date, 20)
 
-            mult_sen = r.multipliers["seniority"][persona.seniority]
-            horas_reales = horas_ideales * mult_sen  # horas calendario que le toman
+            mult_sen = r.multipliers["seniority"][person.seniority]
+            real_hours = ideal_hours * mult_sen  # calendar hours it takes them
 
-            inicio, fin = _schedule_hours(r, persona.id, fecha_desde, horas_reales)
+            start, end = _schedule_hours(r, person.id, from_date, real_hours)
             assignments.append(
                 TaskAssignment(
-                    elemento_id=t["elemento_id"],
-                    elemento_nombre=t["elemento_nombre"],
+                    element_id=t["element_id"],
+                    element_name=t["element_name"],
                     atomic_id=atomic.id,
-                    atomic_nombre=atomic.nombre,
-                    departamento=depto,
-                    fase_id=fase["id"],
-                    empleado_id=persona.id,
-                    empleado_nombre=persona.nombre,
-                    horas=round(horas_reales, 2),
-                    inicio=inicio,
-                    fin=fin,
+                    atomic_name=atomic.name,
+                    department=dept,
+                    phase_id=phase["id"],
+                    employee_id=person.id,
+                    employee_name=person.name,
+                    hours=round(real_hours, 2),
+                    start=start,
+                    end=end,
                 )
             )
-            if fin > depto_fin:
-                depto_fin = fin
+            if end > dept_end:
+                dept_end = end
 
-        if depto_fin > fase_fin:
-            fase_fin = depto_fin
+        if dept_end > phase_end:
+            phase_end = dept_end
 
-    return assignments, fase_fin
+    return assignments, phase_end
 
 
-def _pick_person(r: Roster, candidates: list, fecha_desde: date, ventana_dias: int):
-    """Elige a la persona con más horas efectivas libres en la ventana próxima."""
-    mejor = None
-    mejor_horas = -1.0
+def _pick_person(r: Roster, candidates: list, from_date: date, window_days: int):
+    """Picks the person with the most free effective hours in the upcoming window."""
+    best = None
+    best_hours = -1.0
     for emp in candidates:
         total = 0.0
-        d = _next_working_day(r, fecha_desde)
-        dias = 0
-        while dias < ventana_dias:
+        d = _next_working_day(r, from_date)
+        days = 0
+        while days < window_days:
             total += r.available_hours(emp.id, d)
             d += timedelta(days=1)
-            dias += 1
-        if total > mejor_horas:
-            mejor_horas = total
-            mejor = emp
-    return mejor
+            days += 1
+        if total > best_hours:
+            best_hours = total
+            best = emp
+    return best
 
 
-# Usage tracking global (reservas hechas en este roadmap, para no doble-asignar)
+# Global usage tracking (reservations made in this roadmap, to avoid double-assigning)
 _usage: dict[tuple[str, date], float] = {}
 
 
@@ -217,32 +217,32 @@ def _reset_usage():
     _usage.clear()
 
 
-def _schedule_hours(r: Roster, emp_id: str, fecha_desde: date, horas: float) -> tuple[date, date]:
-    """Consume horas de una persona día por día desde fecha_desde hasta completar.
-    Registra el uso en _usage para que las siguientes tareas respeten las reservas previas."""
-    restante = horas
-    inicio: date | None = None
-    ultimo: date | None = None
-    d = _next_working_day(r, fecha_desde)
+def _schedule_hours(r: Roster, emp_id: str, from_date: date, hours: float) -> tuple[date, date]:
+    """Consumes hours from a person day by day from from_date until complete.
+    Records usage in _usage so subsequent tasks respect previous reservations."""
+    remaining = hours
+    start: date | None = None
+    last: date | None = None
+    d = _next_working_day(r, from_date)
     safety = 0
-    while restante > 0.01:
+    while remaining > 0.01:
         safety += 1
         if safety > 3650:
-            raise RuntimeError(f"Loop en _schedule_hours para {emp_id}")
-        libre_dia = r.available_hours(emp_id, d) - _usage.get((emp_id, d), 0.0)
-        if libre_dia > 0.01:
-            usar = min(restante, libre_dia)
-            _usage[(emp_id, d)] = _usage.get((emp_id, d), 0.0) + usar
-            restante -= usar
-            if inicio is None:
-                inicio = d
-            ultimo = d
+            raise RuntimeError(f"Loop in _schedule_hours for {emp_id}")
+        free_day = r.available_hours(emp_id, d) - _usage.get((emp_id, d), 0.0)
+        if free_day > 0.01:
+            use = min(remaining, free_day)
+            _usage[(emp_id, d)] = _usage.get((emp_id, d), 0.0) + use
+            remaining -= use
+            if start is None:
+                start = d
+            last = d
         d += timedelta(days=1)
         while not r.is_working_day(d):
             d += timedelta(days=1)
 
-    assert inicio is not None and ultimo is not None
-    return inicio, ultimo
+    assert start is not None and last is not None
+    return start, last
 
 
 # ---------------- entry point ----------------
@@ -253,110 +253,110 @@ def build_roadmap(
     roster: Roster,
 ) -> Roadmap:
     _reset_usage()
-    proyecto = input_data["proyecto"]
-    fecha_deseada = date.fromisoformat(str(input_data["fecha_inicio_deseada"]))
+    project = input_data["project"]
+    desired_date = date.fromisoformat(str(input_data["desired_start_date"]))
 
-    # Filtrar empleados según input (si se restringe)
-    if "empleados_id" in input_data and input_data["empleados_id"]:
-        emp_ids = set(input_data["empleados_id"])
+    # Filter employees by input (if restricted)
+    if "employee_ids" in input_data and input_data["employee_ids"]:
+        emp_ids = set(input_data["employee_ids"])
     else:
         emp_ids = set(roster.employees.keys())
 
-    mult_dif = catalog.multipliers["dificultad"]
+    mult_dif = catalog.multipliers["difficulty"]
 
-    # Expansión
+    # Expansion
     exp: list[dict] = []
-    exp += _expand_items(input_data.get("paginas", []), catalog.pages, mult_dif)
+    exp += _expand_items(input_data.get("pages", []), catalog.pages, mult_dif)
     exp += _expand_items(input_data.get("features", []), catalog.features, mult_dif)
-    exp += _expand_items(input_data.get("integraciones", []), catalog.integrations, mult_dif)
+    exp += _expand_items(input_data.get("integrations", []), catalog.integrations, mult_dif)
 
-    # Calcular horas_base × horas_ideales_por_unidad para cada atómica expandida
+    # Calculate base_hours x ideal_hours_per_unit for each expanded atomic task
     for t in exp:
         atomic = catalog.atomic[t["atomic_id"]]
-        t["horas_ideales_total"] = atomic.horas_base * t["horas_ideales_por_unidad"]
+        t["ideal_hours_total"] = atomic.base_hours * t["ideal_hours_per_unit"]
 
-    # Agrupar horas por depto
-    horas_por_depto: dict[str, float] = {}
-    horas_por_elemento: dict[str, float] = {}
+    # Group hours by department
+    hours_by_dept: dict[str, float] = {}
+    hours_by_element: dict[str, float] = {}
     for t in exp:
-        dept = catalog.atomic[t["atomic_id"]].departamento
-        horas_por_depto[dept] = horas_por_depto.get(dept, 0.0) + t["horas_ideales_total"]
-        horas_por_elemento[t["elemento_nombre"]] = (
-            horas_por_elemento.get(t["elemento_nombre"], 0.0) + t["horas_ideales_total"]
+        dept = catalog.atomic[t["atomic_id"]].department
+        hours_by_dept[dept] = hours_by_dept.get(dept, 0.0) + t["ideal_hours_total"]
+        hours_by_element[t["element_name"]] = (
+            hours_by_element.get(t["element_name"], 0.0) + t["ideal_hours_total"]
         )
 
-    # Corrimiento de inicio según la primera fase
-    fases = [f for f in catalog.dependencies if not f.get("opcional") or f["id"] != "qa"]
-    primera_fase = fases[0]
-    depto_inicial = primera_fase["departamentos"][0]
-    fecha_inicio_efectiva, razon = _find_shift_start(roster, depto_inicial, fecha_deseada, emp_ids)
-    corrimiento = (fecha_inicio_efectiva - fecha_deseada).days
+    # Start date shifting based on the first phase
+    phases = [f for f in catalog.dependencies if not f.get("optional") or f["id"] != "qa"]
+    first_phase = phases[0]
+    initial_dept = first_phase["departments"][0]
+    effective_start_date, reason = _find_shift_start(roster, initial_dept, desired_date, emp_ids)
+    shift = (effective_start_date - desired_date).days
 
-    # Secuenciar fases respetando dependencias
-    fase_fin_by_id: dict[str, date] = {}
-    assignments_all: list[TaskAssignment] = []
-    fases_resumen = []
-    advertencias: list[str] = []
+    # Sequence phases respecting dependencies
+    phase_end_by_id: dict[str, date] = {}
+    all_assignments: list[TaskAssignment] = []
+    phases_summary = []
+    warnings: list[str] = []
 
-    for fase in fases:
-        if fase.get("opcional"):
-            continue  # QA solo si se pide explícitamente (no en MVP)
+    for phase in phases:
+        if phase.get("optional"):
+            continue  # QA only if explicitly requested (not in MVP)
 
-        # Determinar fecha desde la cual puede empezar esta fase
-        deps = fase.get("depende_de", [])
+        # Determine the date from which this phase can start
+        deps = phase.get("depends_on", [])
         if deps:
-            fecha_desde = max(fase_fin_by_id[d] for d in deps) + timedelta(days=1)
-            fecha_desde = _next_working_day(roster, fecha_desde)
+            from_date = max(phase_end_by_id[d] for d in deps) + timedelta(days=1)
+            from_date = _next_working_day(roster, from_date)
         else:
-            fecha_desde = fecha_inicio_efectiva
+            from_date = effective_start_date
 
-        # Horas por depto para esta fase
-        horas_fase_depto = {
+        # Hours by department for this phase
+        phase_hours_by_dept = {
             d: sum(
-                t["horas_ideales_total"]
+                t["ideal_hours_total"]
                 for t in exp
-                if catalog.atomic[t["atomic_id"]].departamento == d
+                if catalog.atomic[t["atomic_id"]].department == d
             )
-            for d in fase["departamentos"]
+            for d in phase["departments"]
         }
 
-        tareas_fase = [
+        phase_tasks = [
             t for t in exp
-            if catalog.atomic[t["atomic_id"]].departamento in fase["departamentos"]
+            if catalog.atomic[t["atomic_id"]].department in phase["departments"]
         ]
 
-        if sum(horas_fase_depto.values()) == 0:
-            fase_fin_by_id[fase["id"]] = fecha_desde
+        if sum(phase_hours_by_dept.values()) == 0:
+            phase_end_by_id[phase["id"]] = from_date
             continue
 
-        asignaciones, fase_fin = _assign_phase(
-            roster, fase, horas_fase_depto, tareas_fase, catalog, emp_ids, fecha_desde,
+        assignments, phase_end = _assign_phase(
+            roster, phase, phase_hours_by_dept, phase_tasks, catalog, emp_ids, from_date,
         )
-        assignments_all.extend(asignaciones)
-        fase_fin_by_id[fase["id"]] = fase_fin
+        all_assignments.extend(assignments)
+        phase_end_by_id[phase["id"]] = phase_end
 
-        fases_resumen.append(
+        phases_summary.append(
             {
-                "fase": fase["nombre"],
-                "inicio": fecha_desde.isoformat(),
-                "fin": fase_fin.isoformat(),
-                "horas": round(sum(a.horas for a in asignaciones), 2),
+                "phase": phase["name"],
+                "start": from_date.isoformat(),
+                "end": phase_end.isoformat(),
+                "hours": round(sum(a.hours for a in assignments), 2),
             }
         )
 
-    fecha_fin = max(fase_fin_by_id.values()) if fase_fin_by_id else fecha_inicio_efectiva
+    end_date = max(phase_end_by_id.values()) if phase_end_by_id else effective_start_date
 
     return Roadmap(
-        proyecto=proyecto,
-        fecha_inicio_deseada=fecha_deseada,
-        fecha_inicio_efectiva=fecha_inicio_efectiva,
-        fecha_fin=fecha_fin,
-        corrimiento_dias=corrimiento,
-        razon_corrimiento=razon,
-        tareas=sorted(assignments_all, key=lambda a: (a.inicio, a.departamento)),
-        fases_resumen=fases_resumen,
-        horas_por_depto={k: round(v, 2) for k, v in horas_por_depto.items()},
-        horas_por_elemento={k: round(v, 2) for k, v in horas_por_elemento.items()},
-        advertencias=advertencias,
+        project=project,
+        desired_start_date=desired_date,
+        effective_start_date=effective_start_date,
+        end_date=end_date,
+        shift_days=shift,
+        shift_reason=reason,
+        tasks=sorted(all_assignments, key=lambda a: (a.start, a.department)),
+        phases_summary=phases_summary,
+        hours_by_dept={k: round(v, 2) for k, v in hours_by_dept.items()},
+        hours_by_element={k: round(v, 2) for k, v in hours_by_element.items()},
+        warnings=warnings,
         feature=input_data.get("feature", ""),
     )

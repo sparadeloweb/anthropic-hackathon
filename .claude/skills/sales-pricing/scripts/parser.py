@@ -78,18 +78,18 @@ def _parse_summary(text: str) -> dict:
         "total_hours": 0.0,
     }
     # Roadmap labels are in Spanish ("Fecha de inicio efectiva", "Horas totales", etc.)
-    m = re.search(r"Fecha de inicio efectiva[^0-9]*([\d\-]+)", text)
+    m = re.search(r"(Fecha de inicio efectiva|Effective start date)[^0-9]*([\d\-]+)", text)
     if m:
-        out["start_date"] = m.group(1)
-    m = re.search(r"Fecha estimada de fin[^0-9]*([\d\-]+)", text)
+        out["start_date"] = m.group(2)
+    m = re.search(r"(Fecha estimada de fin|Estimated end date)[^0-9]*([\d\-]+)", text)
     if m:
-        out["end_date"] = m.group(1)
-    m = re.search(r"Duraci[oó]n[^0-9]*(\d+)\s*d[ií]as laborales", text)
+        out["end_date"] = m.group(2)
+    m = re.search(r"(Duraci[oó]n|Duration)[^0-9]*(\d+)\s*(d[ií]as laborales|working days)", text)
     if m:
-        out["duration_working_days"] = int(m.group(1))
-    m = re.search(r"Horas totales[^0-9]*([\d\.,]+)", text)
+        out["duration_working_days"] = int(m.group(2))
+    m = re.search(r"(Horas totales|Estimated total hours)[^0-9]*([\d\.,]+)", text)
     if m:
-        out["total_hours"] = float(m.group(1).replace(",", "."))
+        out["total_hours"] = float(m.group(2).replace(",", "."))
     return out
 
 
@@ -102,7 +102,7 @@ def _parse_hours_by_dept(text: str) -> dict[str, float]:
     table_started = False
     for line in text.splitlines():
         stripped = line.strip()
-        if re.match(r"^##\s*Horas por (departamento|[aá]rea)", stripped):
+        if re.match(r"^##\s*(Horas por (departamento|[aá]rea)|Hours by area)", stripped):
             in_section = True
             continue
         if not in_section:
@@ -111,7 +111,7 @@ def _parse_hours_by_dept(text: str) -> dict[str, float]:
             break
         if stripped.startswith("|"):
             table_started = True
-            if "---" in stripped or re.match(r"^\|\s*(Departamento|[ÁA]rea|Role|Rol)\s*\|", stripped):
+            if "---" in stripped or re.match(r"^\|\s*(Departamento|[ÁA]rea|Area|Role|Rol)\s*\|", stripped):
                 continue
             cells = [c.strip() for c in stripped.strip("|").split("|")]
             if len(cells) >= 2:
@@ -132,7 +132,7 @@ def _parse_phases(text: str) -> list[dict]:
     table_started = False
     for line in text.splitlines():
         stripped = line.strip()
-        if re.match(r"^##\s*Fases\b", stripped):
+        if re.match(r"^##\s*(Fases|Project phases)\b", stripped):
             in_section = True
             continue
         if not in_section:

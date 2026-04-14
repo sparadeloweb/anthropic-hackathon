@@ -1,4 +1,4 @@
-"""Carga el roster y las asignaciones, y expone funciones de disponibilidad por persona y día."""
+"""Loads the roster and allocations, and exposes availability functions per person per day."""
 from __future__ import annotations
 
 import sys
@@ -15,19 +15,19 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 @dataclass
 class Employee:
     id: str
-    nombre: str
-    departamento: str
+    name: str
+    department: str
     seniority: str
-    dedicacion_default: float
+    default_allocation: float
 
 
 @dataclass
 class Allocation:
-    empleado_id: str
-    proyecto: str
-    desde: date
-    hasta: date
-    dedicacion: float
+    employee_id: str
+    project: str
+    start: date
+    end: date
+    allocation: float
 
 
 @dataclass
@@ -40,7 +40,7 @@ class Roster:
     multipliers: dict = field(default_factory=dict)
 
     def is_working_day(self, d: date) -> bool:
-        if d.isoweekday() not in self.config["dias_laborables"]:
+        if d.isoweekday() not in self.config["working_days"]:
             return False
         if d in self.holidays:
             return False
@@ -49,26 +49,26 @@ class Roster:
     def allocated_on(self, emp_id: str, d: date) -> float:
         total = 0.0
         for a in self.allocations:
-            if a.empleado_id == emp_id and a.desde <= d <= a.hasta:
-                total += a.dedicacion
+            if a.employee_id == emp_id and a.start <= d <= a.end:
+                total += a.allocation
         return total
 
     def available_hours(self, emp_id: str, d: date) -> float:
         if not self.is_working_day(d):
             return 0.0
         emp = self.employees[emp_id]
-        free = emp.dedicacion_default - self.allocated_on(emp_id, d)
+        free = emp.default_allocation - self.allocated_on(emp_id, d)
         free = max(0.0, min(free, 1.0))
-        return free * self.config["horas_por_dia"] * self.config["productividad"]
+        return free * self.config["hours_per_day"] * self.config["productivity"]
 
     def effective_hours(self, emp_id: str, d: date) -> float:
-        """Horas disponibles ajustadas a equivalencia Semi (útil para sumar capacidad de equipo)."""
+        """Available hours adjusted to Semi equivalence (useful for summing team capacity)."""
         raw = self.available_hours(emp_id, d)
         mult = self.multipliers["seniority"][self.employees[emp_id].seniority]
         return raw / mult
 
     def employees_by_dept(self, dept: str) -> list[Employee]:
-        return [e for e in self.employees.values() if e.departamento == dept]
+        return [e for e in self.employees.values() if e.department == dept]
 
 
 def _load_yaml(path: Path):
@@ -93,29 +93,29 @@ def load_roster(
     for e in emp_raw:
         emp = Employee(**e)
         if emp.id in employees:
-            raise ValueError(f"Empleado duplicado: {emp.id}")
+            raise ValueError(f"Duplicate employee: {emp.id}")
         if emp.seniority not in ("junior", "semi", "senior"):
-            raise ValueError(f"Seniority inválido en {emp.id}: {emp.seniority}")
-        if not 0 < emp.dedicacion_default <= 1.0:
-            raise ValueError(f"dedicacion_default inválida en {emp.id}")
+            raise ValueError(f"Invalid seniority for {emp.id}: {emp.seniority}")
+        if not 0 < emp.default_allocation <= 1.0:
+            raise ValueError(f"Invalid default_allocation for {emp.id}")
         employees[emp.id] = emp
 
     alloc_raw = _load_yaml(roster_dir / allocations_file) or []
     allocations: list[Allocation] = []
     for a in alloc_raw:
         alloc = Allocation(
-            empleado_id=a["empleado_id"],
-            proyecto=a["proyecto"],
-            desde=_parse_date(a["desde"]),
-            hasta=_parse_date(a["hasta"]),
-            dedicacion=float(a["dedicacion"]),
+            employee_id=a["employee_id"],
+            project=a["project"],
+            start=_parse_date(a["from"]),
+            end=_parse_date(a["to"]),
+            allocation=float(a["allocation"]),
         )
-        if alloc.empleado_id not in employees:
-            raise ValueError(f"Allocation referencia empleado inexistente: {alloc.empleado_id}")
-        if alloc.hasta < alloc.desde:
-            raise ValueError(f"Allocation con rango inválido: {alloc.empleado_id} {alloc.proyecto}")
-        if not 0 < alloc.dedicacion <= 1.0:
-            raise ValueError(f"Dedicacion inválida: {alloc.empleado_id} {alloc.proyecto}")
+        if alloc.employee_id not in employees:
+            raise ValueError(f"Allocation references non-existent employee: {alloc.employee_id}")
+        if alloc.end < alloc.start:
+            raise ValueError(f"Allocation with invalid range: {alloc.employee_id} {alloc.project}")
+        if not 0 < alloc.allocation <= 1.0:
+            raise ValueError(f"Invalid allocation: {alloc.employee_id} {alloc.project}")
         allocations.append(alloc)
 
     config = _load_yaml(data_dir / "config.yaml")
@@ -126,9 +126,9 @@ def load_roster(
     holiday_names: dict[date, str] = {}
     for year_entries in holidays_raw.values():
         for h in year_entries:
-            d = _parse_date(h["fecha"])
+            d = _parse_date(h["date"])
             holidays.add(d)
-            holiday_names[d] = h["nombre"]
+            holiday_names[d] = h["name"]
 
     return Roster(
         employees=employees,
@@ -148,11 +148,11 @@ def main() -> int:
             print(f"[ERROR] {e}", file=sys.stderr)
             return 1
         print(
-            f"[OK] Roster válido: {len(r.employees)} empleados, "
-            f"{len(r.allocations)} asignaciones, {len(r.holidays)} feriados."
+            f"[OK] Valid roster: {len(r.employees)} employees, "
+            f"{len(r.allocations)} allocations, {len(r.holidays)} holidays."
         )
         return 0
-    print("Uso: python roster.py --validate")
+    print("Usage: python roster.py --validate")
     return 2
 
 

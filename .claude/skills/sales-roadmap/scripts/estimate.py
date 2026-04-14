@@ -1,10 +1,10 @@
-"""Entry point de la skill. Recibe un JSON de input y genera el roadmap en Markdown y PDF.
+"""Entry point for the sales-roadmap skill. Takes a JSON input and generates the roadmap in Markdown and PDF.
 
-Guarda ambos archivos bajo <repo_root>/roadmaps/<cliente_slug>/<nombre>.{md,pdf}.
+Saves both files under <repo_root>/roadmaps/<client_slug>/<name>.{md,pdf}.
 
-Uso:
+Usage:
     python estimate.py path/to/input.json
-    python estimate.py path/to/input.json --stdout    # además imprime el MD por stdout
+    python estimate.py path/to/input.json --stdout    # also prints the MD to stdout
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ SKILL_ROOT = Path(__file__).resolve().parent.parent
 REPO_ROOT = SKILL_ROOT.parent.parent.parent  # .claude/skills/sales-roadmap -> repo root
 ROADMAPS_DIR = REPO_ROOT / "roadmaps"
 
-# CSS para el PDF — diseño profesional orientado al cliente.
+# CSS for the PDF — professional client-facing design.
 PDF_CSS = """
 <style>
 body {
@@ -89,9 +89,9 @@ def _slugify(text: str) -> str:
     text = re.sub(r"ñ", "n", text)
     text = re.sub(r"[^a-z0-9\- ]", "", text)
     text = re.sub(r"[\s]+", "-", text)
-    text = re.sub(r"-{2,}", "-", text)  # colapsar guiones múltiples
+    text = re.sub(r"-{2,}", "-", text)  # collapse multiple dashes
     text = text.strip("-")
-    return text or "proyecto"
+    return text or "project"
 
 
 def _write_pdf(md_text: str, pdf_path: Path, title: str) -> None:
@@ -104,16 +104,16 @@ def _write_pdf(md_text: str, pdf_path: Path, title: str) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Estimador de roadmap de producto.")
-    parser.add_argument("input", help="Ruta al JSON de input del proyecto")
+    parser = argparse.ArgumentParser(description="Product roadmap estimator.")
+    parser.add_argument("input", help="Path to the project input JSON")
     parser.add_argument(
-        "--stdout", action="store_true", help="Imprime también el Markdown por stdout"
+        "--stdout", action="store_true", help="Also print the Markdown to stdout"
     )
     args = parser.parse_args()
 
     input_path = Path(args.input)
     if not input_path.exists():
-        print(f"[ERROR] No se encontró el archivo de input: {input_path}", file=sys.stderr)
+        print(f"[ERROR] Input file not found: {input_path}", file=sys.stderr)
         return 1
 
     with open(input_path, encoding="utf-8") as f:
@@ -124,24 +124,24 @@ def main() -> int:
     roadmap = build_roadmap(input_data, catalog, roster)
     md = render(roadmap, catalog.config, roster.holidays)
 
-    # Carpeta del cliente: usar cliente_slug explícito si viene en el input,
-    # sino generar desde el nombre del cliente/lead.
-    if input_data.get("cliente_slug"):
-        cliente_slug = input_data["cliente_slug"]
+    # Client folder: use explicit client_slug if present in input,
+    # otherwise generate from the client/lead name.
+    if input_data.get("client_slug"):
+        client_slug = input_data["client_slug"]
     else:
-        cliente = input_data.get("cliente") or input_data.get("lead") or input_data["proyecto"]
-        cliente_slug = _slugify(cliente)
+        client = input_data.get("client") or input_data.get("lead") or input_data["project"]
+        client_slug = _slugify(client)
 
-    # Nombre del archivo: feature slug o proyecto slug (sin timestamp).
+    # File name: feature slug or project slug (no timestamp).
     feature = input_data.get("feature")
     if feature:
         file_prefix = _slugify(feature)
-        pdf_title = f"Roadmap — {input_data['proyecto']} — {feature}"
+        pdf_title = f"Roadmap — {input_data['project']} — {feature}"
     else:
-        file_prefix = _slugify(input_data["proyecto"])
-        pdf_title = f"Roadmap — {input_data['proyecto']}"
+        file_prefix = _slugify(input_data["project"])
+        pdf_title = f"Roadmap — {input_data['project']}"
 
-    target_dir = ROADMAPS_DIR / cliente_slug
+    target_dir = ROADMAPS_DIR / client_slug
     target_dir.mkdir(parents=True, exist_ok=True)
 
     md_path = target_dir / f"{file_prefix}.md"

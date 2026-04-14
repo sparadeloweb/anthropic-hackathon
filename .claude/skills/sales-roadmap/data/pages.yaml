@@ -1,76 +1,76 @@
-# Catálogo de páginas típicas. Cada página se descompone en tareas atómicas.
+# Catalog of typical pages. Each page is broken down into atomic tasks.
 
 - id: page.login
-  nombre: "Página de Login"
-  tareas:
-    - { id: design.screen_mockup, cantidad: 1 }
-    - { id: frontend.form_with_validation, cantidad: 1 }
-    - { id: backend.auth_setup, cantidad: 1 }
-    - { id: backend.crud_endpoint, cantidad: 2 }
+  name: "Login page"
+  tasks:
+    - { id: design.screen_mockup, quantity: 1 }
+    - { id: frontend.form_with_validation, quantity: 1 }
+    - { id: backend.auth_setup, quantity: 1 }
+    - { id: backend.crud_endpoint, quantity: 2 }
 
 - id: page.register
-  nombre: "Página de Registro"
-  tareas:
-    - { id: design.screen_mockup, cantidad: 1 }
-    - { id: frontend.form_with_validation, cantidad: 1 }
-    - { id: backend.crud_endpoint, cantidad: 2 }
+  name: "Registration page"
+  tasks:
+    - { id: design.screen_mockup, quantity: 1 }
+    - { id: frontend.form_with_validation, quantity: 1 }
+    - { id: backend.crud_endpoint, quantity: 2 }
 
 - id: page.password_recovery
-  nombre: "Recuperación de contraseña"
-  tareas:
-    - { id: design.screen_mockup, cantidad: 2 }
-    - { id: frontend.form_with_validation, cantidad: 2 }
-    - { id: backend.crud_endpoint, cantidad: 2 }
+  name: "Password recovery"
+  tasks:
+    - { id: design.screen_mockup, quantity: 2 }
+    - { id: frontend.form_with_validation, quantity: 2 }
+    - { id: backend.crud_endpoint, quantity: 2 }
 
 - id: page.landing
-  nombre: "Landing"
-  tareas:
-    - { id: design.screen_mockup, cantidad: 1 }
-    - { id: frontend.standard_screen, cantidad: 1 }
+  name: "Landing"
+  tasks:
+    - { id: design.screen_mockup, quantity: 1 }
+    - { id: frontend.standard_screen, quantity: 1 }
 
 - id: page.dashboard_simple
-  nombre: "Dashboard simple"
-  tareas:
-    - { id: design.screen_mockup, cantidad: 1 }
-    - { id: frontend.standard_screen, cantidad: 1 }
-    - { id: frontend.chart_or_visualization, cantidad: 2 }
-    - { id: backend.crud_endpoint, cantidad: 3 }
+  name: "Simple dashboard"
+  tasks:
+    - { id: design.screen_mockup, quantity: 1 }
+    - { id: frontend.standard_screen, quantity: 1 }
+    - { id: frontend.chart_or_visualization, quantity: 2 }
+    - { id: backend.crud_endpoint, quantity: 3 }
 
 - id: page.dashboard_advanced
-  nombre: "Dashboard avanzado con filtros"
-  tareas:
-    - { id: design.screen_mockup, cantidad: 2 }
-    - { id: frontend.data_table, cantidad: 1 }
-    - { id: frontend.chart_or_visualization, cantidad: 4 }
-    - { id: frontend.state_management_setup, cantidad: 1 }
-    - { id: backend.crud_endpoint, cantidad: 5 }
-    - { id: backend.complex_business_logic, cantidad: 1 }
+  name: "Advanced dashboard with filters"
+  tasks:
+    - { id: design.screen_mockup, quantity: 2 }
+    - { id: frontend.data_table, quantity: 1 }
+    - { id: frontend.chart_or_visualization, quantity: 4 }
+    - { id: frontend.state_management_setup, quantity: 1 }
+    - { id: backend.crud_endpoint, quantity: 5 }
+    - { id: backend.complex_business_logic, quantity: 1 }
 
 - id: page.profile
-  nombre: "Perfil de usuario"
-  tareas:
-    - { id: design.screen_mockup, cantidad: 1 }
-    - { id: frontend.form_with_validation, cantidad: 1 }
-    - { id: backend.crud_endpoint, cantidad: 3 }
+  name: "User profile"
+  tasks:
+    - { id: design.screen_mockup, quantity: 1 }
+    - { id: frontend.form_with_validation, quantity: 1 }
+    - { id: backend.crud_endpoint, quantity: 3 }
 
 - id: page.settings
-  nombre: "Configuración"
-  tareas:
-    - { id: design.screen_mockup, cantidad: 2 }
-    - { id: frontend.form_with_validation, cantidad: 2 }
-    - { id: backend.crud_endpoint, cantidad: 4 }
+  name: "Settings"
+  tasks:
+    - { id: design.screen_mockup, quantity: 2 }
+    - { id: frontend.form_with_validation, quantity: 2 }
+    - { id: backend.crud_endpoint, quantity: 4 }
 
 - id: page.list_view
-  nombre: "Listado con tabla/filtros"
-  tareas:
-    - { id: design.screen_mockup, cantidad: 1 }
-    - { id: frontend.data_table, cantidad: 1 }
-    - { id: backend.crud_endpoint, cantidad: 3 }
+  name: "List view with table/filters"
+  tasks:
+    - { id: design.screen_mockup, quantity: 1 }
+    - { id: frontend.data_table, quantity: 1 }
+    - { id: backend.crud_endpoint, quantity: 3 }
 
 - id: page.detail_view
-  nombre: "Vista detalle de entidad"
-  tareas:
-    - { id: design.screen_mockup, cantidad: 1 }
-    - { id: frontend.standard_screen, cantidad: 1 }
-    - { id: frontend.form_with_validation, cantidad: 1 }
-    - { id: backend.crud_endpoint, cantidad: 3 }
+  name: "Entity detail view"
+  tasks:
+    - { id: design.screen_mockup, quantity: 1 }
+    - { id: frontend.standard_screen, quantity: 1 }
+    - { id: frontend.form_with_validation, quantity: 1 }
+    - { id: backend.crud_endpoint, quantity: 3 }

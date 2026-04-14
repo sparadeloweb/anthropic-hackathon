@@ -1,113 +1,113 @@
 ---
 name: sales-proposal
 model: sonnet
-description: Genera una propuesta comercial profesional para un lead, combinando el diseño de Stitch, el roadmap estimado y los datos del negocio. Produce un mensaje listo para enviar al cliente. Úsala cuando el usuario quiera armar una propuesta, mensaje de venta, pitch comercial o presentación para un lead.
+description: Generates a professional business proposal for a lead by combining the Stitch design, estimated roadmap, and business data. Produces a ready-to-send message to the client. Use when the user wants to create a proposal, sales pitch, or commercial presentation for a lead.
 ---
 
-# Generador de propuestas comerciales
+# Commercial proposal generator
 
-Esta skill genera un mensaje de propuesta comercial profesional, combinando tres fuentes de datos del lead:
+This skill generates a professional business proposal message by combining three data sources for the lead:
 
-1. **Diseño de Stitch** (`stitch_designs/<lead>/`) — qué se diseñó, cuántas pantallas, estilo visual
-2. **Roadmap** (`roadmaps/<lead>/`) — tiempos, equipo, fases, horas estimadas
-3. **Datos del negocio** (`leads/`) — tipo de negocio, reseñas, dirección, rating, horarios
+1. **Stitch design** (`stitch_designs/<lead>/`) — what was designed, how many screens, visual style
+2. **Roadmap** (`roadmaps/<lead>/`) — timelines, team, phases, estimated hours
+3. **Business data** (`leads/`) — business type, reviews, address, rating, hours
 
-## Cuándo usarla
+## When to use
 
-- "Armame una propuesta para este lead"
-- "Generá un mensaje de venta para Fernando Bliman"
-- "Haceme un pitch comercial con lo que ya tenemos"
-- "Quiero mandarle una propuesta al cliente"
+- "Create a proposal for this lead"
+- "Generate a sales message for Fernando Bliman"
+- "Put together a pitch with what we have"
+- "I want to send the client a proposal"
 
 ## Workflow
 
-1. **Listar leads disponibles** — buscar carpetas en `<repo_root>/stitch_designs/` que también tengan carpeta en `<repo_root>/roadmaps/` (es decir, leads que ya tienen diseño Y roadmap). Mostrar la lista al usuario.
+1. **List available leads** — find folders in `<repo_root>/stitch_designs/` that also have a folder in `<repo_root>/roadmaps/` (i.e., leads that have both a design AND a roadmap). Show the list to the user.
 
-2. **El usuario elige un lead** — o lo indica directamente si ya lo mencionó.
+2. **User picks a lead** — or specifies one directly if already mentioned.
 
-3. **Preguntar idioma** — preguntar al usuario en qué idioma quiere la propuesta. Detectar el idioma por defecto según la ubicación del lead:
-   - Buscar en `leads/` el archivo `leads_data.json` que contenga el lead (por `displayName`)
-   - Usar el campo `postalAddress.regionCode` o `formattedAddress` para inferir el país
-   - Si el país es hispanohablante → **español** por defecto
-   - Si el país es Brasil → **portugués** por defecto
-   - Si no se puede determinar o es otro país → **inglés** por defecto
-   - Mostrar el idioma sugerido y preguntar: "¿Te parece bien en [idioma] o preferís otro?"
+3. **Ask for language** — ask the user what language they want the proposal in. Auto-detect the default language from the lead's location:
+   - Search in `leads/` for the `leads_data.json` file containing the lead (by `displayName`)
+   - Use the `postalAddress.regionCode` or `formattedAddress` field to infer the country
+   - If the country is Spanish-speaking → **Spanish** by default
+   - If the country is Brazil → **Portuguese** by default
+   - If it can't be determined or is another country → **English** by default
+   - Show the suggested language and ask: "Does [language] work for you, or would you prefer another?"
 
-4. **Recolectar contexto** — leer los tres archivos del lead:
+4. **Gather context** — read the three files for the lead:
 
    a. **Stitch** — `stitch_designs/<lead-slug>/stitch_project.json`:
-      - `leadName` — nombre del negocio
-      - `projectType` — tipo de proyecto (single_page, multi_page, app)
-      - `screens[]` — pantallas diseñadas (nombres y cantidad)
-      - `designSystem` — colores, tipografía, estilo
+      - `leadName` — business name
+      - `projectType` — project type (single_page, multi_page, app)
+      - `screens[]` — designed screens (names and count)
+      - `designSystem` — colors, typography, style
 
-   b. **Roadmap** — `roadmaps/<lead-slug>/*.md` (si hay varios, usar el del proyecto principal, no features):
-      - Fecha de inicio y fin
-      - Duración en días laborales
-      - Horas totales
-      - Fases y sus duraciones
-      - Equipo asignado
+   b. **Roadmap** — `roadmaps/<lead-slug>/*.md` (if there are several, use the main project one, not features):
+      - Start and end dates
+      - Duration in working days
+      - Total hours
+      - Phases and their durations
+      - Assigned team
 
-   c. **Lead data** — buscar en `leads/*/leads_data.json` la entrada con el `displayName` que matchee:
-      - `primaryTypeDisplayName` — tipo de negocio
-      - `rating` + `userRatingCount` — reputación
-      - `reviews[]` — qué dicen los clientes (para entender el negocio)
-      - `regularOpeningHours` — horarios
-      - `formattedAddress` — ubicación
-      - `internationalPhoneNumber` — contacto
-      - `websiteUri` — si tiene o no web actual
+   c. **Lead data** — search in `leads/*/leads_data.json` for the entry with a matching `displayName`:
+      - `primaryTypeDisplayName` — business type
+      - `rating` + `userRatingCount` — reputation
+      - `reviews[]` — what clients say (to understand the business)
+      - `regularOpeningHours` — schedule
+      - `formattedAddress` — location
+      - `internationalPhoneNumber` — contact
+      - `websiteUri` — whether they currently have a website or not
 
-5. **Generar la propuesta** — redactar un mensaje profesional en el idioma elegido. El tono debe ser:
-   - **Profesional pero cercano** — no corporativo frío, sino consultivo
-   - **Orientado al valor** — no vender tecnología, vender resultados para el negocio
-   - **Específico** — mencionar datos reales del negocio, no genéricos
-   - **Conciso** — que se pueda leer en 2-3 minutos
+5. **Generate the proposal** — write a professional message in the chosen language. The tone should be:
+   - **Professional but approachable** — consultive, not cold corporate
+   - **Value-oriented** — sell results for the business, not technology
+   - **Specific** — mention real data about the business, not generic
+   - **Concise** — readable in 2-3 minutes
 
-   ### Estructura de la propuesta
+   ### Proposal structure
 
-   **Asunto / Encabezado**
-   - Línea de asunto atractiva y específica al negocio
+   **Subject / Header**
+   - Catchy subject line specific to the business
 
-   **Apertura (2-3 líneas)**
-   - Presentación breve de quiénes somos (estudio de desarrollo digital)
-   - Referencia específica al negocio del lead (tipo, ubicación, reputación)
+   **Opening (2-3 lines)**
+   - Brief introduction of who we are (digital development studio)
+   - Specific reference to the lead's business (type, location, reputation)
 
-   **Situación actual (2-3 líneas)**
-   - Observación sobre su presencia digital actual (tiene web / no tiene web)
-   - Oportunidad que están dejando pasar
+   **Current situation (2-3 lines)**
+   - Observation about their current digital presence (has website / no website)
+   - Opportunity they're missing
 
-   **Nuestra propuesta (cuerpo principal)**
-   - Qué diseñamos: descripción del sitio/app con las pantallas (sin jerga técnica)
-   - Cómo se ve: mencionar el estilo visual (colores, tono, sensación)
-   - Qué incluye: listar las secciones/páginas en lenguaje del cliente
+   **Our proposal (main body)**
+   - What we designed: description of the site/app with screens (no technical jargon)
+   - How it looks: mention the visual style (colors, tone, feel)
+   - What's included: list the sections/pages in the client's language
 
-   **Plan de ejecución (resumen del roadmap)**
-   - Duración total (en semanas, no días laborales)
-   - Fases principales con tiempos simples
-   - Equipo dedicado (cantidad de personas, no nombres internos)
-   - NO incluir horas detalladas ni breakdown técnico
+   **Execution plan (roadmap summary)**
+   - Total duration (in weeks, not working days)
+   - Main phases with simple timelines
+   - Dedicated team (number of people, not internal names)
+   - DO NOT include detailed hours or technical breakdown
 
-   **Cierre**
-   - Invitación a una reunión/llamada
-   - Datos de contacto nuestros
-   - Tono de disponibilidad y entusiasmo
+   **Closing**
+   - Invitation to a meeting/call
+   - Our contact details
+   - Tone of availability and enthusiasm
 
-   ### Qué NO incluir en la propuesta
-   - Precios (se discuten en la reunión)
-   - Nombres del equipo interno
-   - Jerga técnica (frameworks, seniority, sprints, deployment)
-   - Horas desglosadas por tarea
-   - Detalles de arquitectura o stack
+   ### What NOT to include in the proposal
+   - Prices (discussed in the meeting)
+   - Internal team member names
+   - Technical jargon (frameworks, seniority, sprints, deployment)
+   - Hours broken down by task
+   - Architecture or stack details
 
-6. **Guardar la propuesta** — escribir el archivo en:
+6. **Save the proposal** — write the file to:
    ```
-   <repo_root>/proposals/<lead-slug>/propuesta.txt
+   <repo_root>/proposals/<lead-slug>/proposal.txt
    ```
-   Usar el **mismo nombre de carpeta** que en `stitch_designs/` y `roadmaps/`.
+   Use the **same folder name** as in `stitch_designs/` and `roadmaps/`.
 
-   Si el idioma no es español, ajustar el nombre del archivo:
-   - Español → `propuesta.txt`
-   - Inglés → `proposal.txt`
-   - Portugués → `proposta.txt`
+   Adjust the filename based on language:
+   - Spanish → `propuesta.txt`
+   - English → `proposal.txt`
+   - Portuguese → `proposta.txt`
 
-7. **Mostrar la propuesta** al usuario — pegar el contenido completo para que pueda revisarlo y pedir ajustes antes de enviarlo.
+7. **Show the proposal** to the user — paste the full content so they can review and request adjustments before sending.

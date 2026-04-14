@@ -1,22 +1,22 @@
-fases:
+phases:
   - id: discovery
-    nombre: "Discovery"
-    departamentos: [Discovery]
-    depende_de: []
+    name: "Discovery"
+    departments: [Discovery]
+    depends_on: []
   - id: design
-    nombre: "Diseño"
-    departamentos: [Diseño]
-    depende_de: [discovery]
+    name: "Design"
+    departments: [Design]
+    depends_on: [discovery]
   - id: architecture
-    nombre: "Arquitectura"
-    departamentos: [Arquitectura]
-    depende_de: [design]
+    name: "Architecture"
+    departments: [Architecture]
+    depends_on: [design]
   - id: build
-    nombre: "Build"
-    departamentos: [Backend, Frontend]
-    depende_de: [architecture]
+    name: "Build"
+    departments: [Backend, Frontend]
+    depends_on: [architecture]
   - id: qa
-    nombre: "QA"
-    departamentos: [QA]
-    depende_de: [build]
-    opcional: true
+    name: "QA"
+    departments: [QA]
+    depends_on: [build]
+    optional: true

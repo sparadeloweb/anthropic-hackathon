@@ -1,55 +1,55 @@
-# Nómina del estudio. Editar a mano al incorporar/desvincular personas.
+# Studio roster. Edit manually when onboarding/offboarding people.
 
 - id: emp.001
-  nombre: "Ana Pérez"
-  departamento: Backend
+  name: "Ana Perez"
+  department: Backend
   seniority: senior
-  dedicacion_default: 1.0
+  default_allocation: 1.0
 
 - id: emp.002
-  nombre: "Luis Gómez"
-  departamento: Backend
+  name: "Luis Gomez"
+  department: Backend
   seniority: semi
-  dedicacion_default: 1.0
+  default_allocation: 1.0
 
 - id: emp.003
-  nombre: "Tomás Ibarra"
-  departamento: Backend
+  name: "Tomas Ibarra"
+  department: Backend
   seniority: junior
-  dedicacion_default: 1.0
+  default_allocation: 1.0
 
 - id: emp.004
-  nombre: "Sofía Martín"
-  departamento: Frontend
+  name: "Sofia Martin"
+  department: Frontend
   seniority: senior
-  dedicacion_default: 1.0
+  default_allocation: 1.0
 
 - id: emp.005
-  nombre: "Nicolás Díaz"
-  departamento: Frontend
+  name: "Nicolas Diaz"
+  department: Frontend
   seniority: semi
-  dedicacion_default: 1.0
+  default_allocation: 1.0
 
 - id: emp.006
-  nombre: "María Ruiz"
-  departamento: Diseño
+  name: "Maria Ruiz"
+  department: Design
   seniority: senior
-  dedicacion_default: 0.5
+  default_allocation: 0.5
 
 - id: emp.007
-  nombre: "Julieta Álvarez"
-  departamento: Diseño
+  name: "Julieta Alvarez"
+  department: Design
   seniority: semi
-  dedicacion_default: 1.0
+  default_allocation: 1.0
 
 - id: emp.008
-  nombre: "Federico López"
-  departamento: Arquitectura
+  name: "Federico Lopez"
+  department: Architecture
   seniority: senior
-  dedicacion_default: 0.5
+  default_allocation: 0.5
 
 - id: emp.009
-  nombre: "Camila Torres"
-  departamento: Discovery
+  name: "Camila Torres"
+  department: Discovery
   seniority: senior
-  dedicacion_default: 0.5
+  default_allocation: 0.5

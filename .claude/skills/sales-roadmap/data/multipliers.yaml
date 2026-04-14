@@ -1,7 +1,7 @@
-dificultad:
-  baja: 1.0
-  media: 1.8
-  alta: 3.0
+difficulty:
+  low: 1.0
+  medium: 1.8
+  high: 3.0
 
 seniority:
   junior: 1.5

@@ -1,164 +1,164 @@
 ---
 name: sales-roadmap
 model: sonnet
-description: Estimación de tiempos y armado de roadmap para proyectos de desarrollo de producto. Úsala cuando el usuario pida estimar un proyecto, armar un roadmap para un cliente, calcular cuánto tarda un desarrollo en base a páginas/features/integraciones, o planificar la asignación del equipo. Cruza los requerimientos contra la nómina real del estudio y las asignaciones vigentes para producir un cronograma tipo Gantt con personas asignadas por nombre.
+description: Estimates project timelines and builds Gantt-style roadmaps for product development. Use when the user asks to estimate a project, build a roadmap for a client, calculate how long a build takes based on pages/features/integrations, or plan team allocation. Cross-references requirements against the real team roster and current allocations to produce a Gantt schedule with named person assignments.
 ---
 
-# Estimador de roadmap de producto
+# Product roadmap estimator
 
-Esta skill produce un roadmap de desarrollo tipo Gantt, con fechas, asignaciones nominales y cronograma respetando dependencias entre fases (Discovery → Diseño → Arquitectura → Backend+Frontend en paralelo).
+This skill produces a Gantt-style development roadmap with dates, named assignments, and a schedule respecting phase dependencies (Discovery → Design → Architecture → Backend+Frontend in parallel).
 
-## Cuándo usarla
+## When to use
 
-- "Armame un roadmap para este proyecto"
-- "¿Cuánto tarda esto?"
-- "Estimemos este proyecto para pasarle al cliente"
-- "¿Cuándo podemos arrancar con este proyecto dado el equipo que tenemos?"
-- "Agregale una feature al roadmap de este cliente"
+- "Build me a roadmap for this project"
+- "How long will this take?"
+- "Let's estimate this project for the client"
+- "When can we start given the team we have?"
+- "Add a feature to this client's roadmap"
 
-## Cómo funciona
+## How it works
 
-1. **Source of truth** — los tiempos base están en `data/` (atomic-tasks, pages, features, integrations) y el equipo en `roster/` (employees, allocations).
-2. **Input del usuario** — JSON con páginas, features, integraciones (con dificultad `baja`/`media`/`alta` y cantidad) y `fecha_inicio_deseada`.
-3. **Scheduler** — expande elementos a tareas atómicas, asigna personas según disponibilidad real, corre la fecha si el equipo está saturado.
-4. **Output** — un Markdown con resumen, horas por depto, asignaciones nominales, Gantt Mermaid y detalle de tareas. Se guarda en `<repo_root>/roadmaps/<cliente_slug>/` (misma convención que `stitch_designs/`).
+1. **Source of truth** — base hours are in `data/` (atomic-tasks, pages, features, integrations) and the team is in `roster/` (employees, allocations).
+2. **User input** — JSON with pages, features, integrations (with difficulty `low`/`medium`/`high` and quantity) and `desired_start_date`.
+3. **Scheduler** — expands elements to atomic tasks, assigns people based on real availability, shifts the start date if the team is saturated.
+4. **Output** — Markdown with summary, hours by department, named assignments, Mermaid Gantt, and task details. Saved to `<repo_root>/roadmaps/<client_slug>/` (same convention as `stitch_designs/`).
 
 ## Workflow
 
-Cuando el usuario invoque esta skill, **siempre empezar preguntando el modo**:
+When the user invokes this skill, **always start by asking the mode**:
 
-> ¿Querés crear un **roadmap para un proyecto nuevo** (desde un diseño de Stitch existente) o agregar una **feature nueva a un proyecto existente**?
+> Do you want to create a **roadmap for a new project** (from an existing Stitch design) or add a **new feature to an existing project**?
 
 ---
 
-### Modo A — Proyecto nuevo (desde Stitch)
+### Mode A — New project (from Stitch)
 
-Usar cuando se va a estimar un proyecto completo por primera vez, típicamente a partir de un diseño ya generado en Stitch.
+Use when estimating a complete project for the first time, typically from an existing Stitch design.
 
-1. **Detectar diseños disponibles** — listar las carpetas dentro de `<repo_root>/stitch_designs/` y mostrarle al usuario los leads disponibles (leer el campo `leadName` de cada `stitch_project.json`).
+1. **Detect available designs** — list folders inside `<repo_root>/stitch_designs/` and show the user the available leads (read the `leadName` field from each `stitch_project.json`).
 
-2. **El usuario elige un lead** — con el `stitch_project.json` seleccionado, extraer:
-   - `leadName` → campo `cliente` del input
-   - Nombre de la carpeta de `stitch_designs/` → campo `cliente_slug` del input (para que la carpeta de `roadmaps/` coincida exactamente)
-   - `screens[]` → mapear **cada pantalla del diseño** a un `page.*` del catálogo (`data/pages.yaml`). El roadmap debe reflejar **únicamente** lo que existe en el diseño de Stitch — no agregar páginas, features ni integraciones que no estén en el mockup. Usar este mapeo orientativo:
+2. **User picks a lead** — with the selected `stitch_project.json`, extract:
+   - `leadName` → `client` field in the input
+   - Folder name from `stitch_designs/` → `client_slug` field in the input (so the `roadmaps/` folder matches exactly)
+   - `screens[]` → map **each screen from the design** to a `page.*` from the catalog (`data/pages.yaml`). The roadmap must reflect **only** what exists in the Stitch design — do not add pages, features, or integrations that are not in the mockup. Use this mapping guide:
      - home / landing → `page.landing`
      - login → `page.login`
      - register → `page.register`
-     - dashboard → `page.dashboard_simple` o `page.dashboard_advanced`
-     - listado / list → `page.list_view`
-     - detalle / detail → `page.detail_view`
-     - perfil / profile → `page.profile`
-     - settings / configuración → `page.settings`
-     - contacto → `page.landing` (variante sencilla)
-     - nosotros / about → `page.landing` (variante sencilla)
-     - servicios → `page.list_view` (variante)
-     - opiniones / reviews → `page.detail_view` (variante)
-   - Si una pantalla no encaja en ningún `page.*`, preguntar al usuario.
+     - dashboard → `page.dashboard_simple` or `page.dashboard_advanced`
+     - list / listing → `page.list_view`
+     - detail → `page.detail_view`
+     - profile → `page.profile`
+     - settings → `page.settings`
+     - contact → `page.landing` (simple variant)
+     - about → `page.landing` (simple variant)
+     - services → `page.list_view` (variant)
+     - reviews / testimonials → `page.detail_view` (variant)
+   - If a screen doesn't match any `page.*`, ask the user.
 
-3. **Mostrar el mapeo y confirmar** con el usuario antes de seguir:
-   - Presentar la tabla de pantallas del diseño → pages del catálogo
-   - Preguntar nombre del proyecto (campo `proyecto`)
-   - Preguntar fecha deseada de inicio (formato `YYYY-MM-DD`)
-   - Confirmar/ajustar las dificultades de cada página
-   - **Solo si el usuario lo pide**, agregar features (`data/features.yaml`) o integraciones (`data/integrations.yaml`) extras que no estén en el diseño
-   - (Opcional) `empleados_id` si se quiere restringir el equipo
+3. **Show the mapping and confirm** with the user before proceeding:
+   - Present the table of design screens → catalog pages
+   - Ask for project name (`project` field)
+   - Ask for desired start date (`YYYY-MM-DD` format)
+   - Confirm/adjust difficulty for each page
+   - **Only if the user asks**, add features (`data/features.yaml`) or integrations (`data/integrations.yaml`) beyond what's in the design
+   - (Optional) `employee_ids` to restrict the team
 
-4. **Guardar el input** como `examples/<slug-del-proyecto>.json`.
+4. **Save the input** as `examples/<project-slug>.json`.
 
-5. **Correr**:
+5. **Run**:
    ```bash
    cd .claude/skills/sales-roadmap
-   uv run --with pyyaml --with markdown-pdf python scripts/estimate.py examples/<archivo>.json
+   uv run --with pyyaml --with markdown-pdf python scripts/estimate.py examples/<file>.json
    ```
-   Genera: `roadmaps/<cliente_slug>/<proyecto_slug>.{md,pdf}`.
+   Generates: `roadmaps/<client_slug>/<project_slug>.{md,pdf}`.
 
-6. **Mostrar el resultado** al usuario: indicarle la ruta del PDF generado y pegar el contenido del Markdown (con el Gantt Mermaid).
+6. **Show the result** to the user: provide the PDF path and paste the Markdown content (with Mermaid Gantt).
 
-7. **Revisar supuestos** — señalar corrimiento de fecha si lo hubo, advertencias, horas totales por departamento.
+7. **Review assumptions** — flag any date shift, warnings, total hours by department.
 
 ---
 
-### Modo B — Feature nueva para proyecto existente
+### Mode B — New feature for existing project
 
-Usar cuando el cliente ya tiene un proyecto estimado y se quiere agregar una funcionalidad nueva. Genera un roadmap separado enfocado solo en la feature, archivado en la misma carpeta del cliente.
+Use when the client already has an estimated project and wants to add new functionality. Generates a separate roadmap focused on just the feature, filed in the same client folder.
 
-1. **Identificar el lead/cliente** — listar las carpetas existentes en `roadmaps/` y/o `stitch_designs/` para que el usuario elija el cliente. Si el usuario ya lo mencionó, usar ese. Usar el nombre de la carpeta existente como campo `cliente_slug` del input para mantener la misma carpeta.
+1. **Identify the lead/client** — list existing folders in `roadmaps/` and/or `stitch_designs/` for the user to pick. If the user already mentioned one, use that. Use the existing folder name as the `client_slug` field to keep the same folder.
 
-2. **Recolectar los datos de la feature** conversando con el usuario:
-   - Nombre de la feature (campo `feature`) — define el prefijo del archivo de salida
-   - Nombre del proyecto original (campo `proyecto`) — se muestra en el título
-   - Fecha deseada de inicio (formato `YYYY-MM-DD`)
-   - Páginas nuevas que requiere la feature (`data/pages.yaml`)
-   - Features del catálogo que apliquen (`data/features.yaml`)
-   - Integraciones nuevas que requiera (`data/integrations.yaml`)
-   - Dificultad y cantidad para cada elemento
-   - (Opcional) `empleados_id` si se quiere restringir el equipo
+2. **Collect feature data** by talking to the user:
+   - Feature name (`feature` field) — defines the output file prefix
+   - Original project name (`project` field) — shown in the title
+   - Desired start date (`YYYY-MM-DD` format)
+   - New pages the feature requires (`data/pages.yaml`)
+   - Catalog features that apply (`data/features.yaml`)
+   - New integrations required (`data/integrations.yaml`)
+   - Difficulty and quantity for each element
+   - (Optional) `employee_ids` to restrict the team
 
-3. **Guardar el input** como `examples/<slug-cliente>-<slug-feature>.json`. El JSON debe incluir el campo `feature`:
+3. **Save the input** as `examples/<client-slug>-<feature-slug>.json`. The JSON must include the `feature` field:
    ```json
    {
-     "cliente": "Nombre del cliente",
-     "cliente_slug": "nombre-carpeta-existente",
-     "proyecto": "Nombre del proyecto original",
-     "feature": "Nombre de la feature nueva",
-     "fecha_inicio_deseada": "YYYY-MM-DD",
-     "paginas": [...],
+     "client": "Client name",
+     "client_slug": "existing-folder-name",
+     "project": "Original project name",
+     "feature": "New feature name",
+     "desired_start_date": "YYYY-MM-DD",
+     "pages": [...],
      "features": [...],
-     "integraciones": [...]
+     "integrations": [...]
    }
    ```
 
-4. **Correr** igual que el modo A:
+4. **Run** same as Mode A:
    ```bash
    cd .claude/skills/sales-roadmap
-   uv run --with pyyaml --with markdown-pdf python scripts/estimate.py examples/<archivo>.json
+   uv run --with pyyaml --with markdown-pdf python scripts/estimate.py examples/<file>.json
    ```
-   Genera: `roadmaps/<cliente_slug>/<feature_slug>.{md,pdf}` (nótese que usa el nombre de la feature como prefijo, no el del proyecto).
+   Generates: `roadmaps/<client_slug>/<feature_slug>.{md,pdf}` (note: uses the feature name as prefix, not the project name).
 
-5. **Mostrar el resultado** al usuario y revisar supuestos.
+5. **Show the result** to the user and review assumptions.
 
 ---
 
-### Notas comunes a ambos modos
+### Notes common to both modes
 
-- Los IDs válidos están en:
-  - `data/pages.yaml` (ej: `page.login`, `page.dashboard_simple`)
-  - `data/features.yaml` (ej: `feature.notifications`, `feature.roles_permissions`)
-  - `data/integrations.yaml` (ej: `integration.stripe`, `integration.sendgrid`)
-- Si el usuario menciona algo que no está en el catálogo, **preguntale** si podés agregarlo a los YAMLs antes de seguir.
+- Valid IDs are in:
+  - `data/pages.yaml` (e.g., `page.login`, `page.dashboard_simple`)
+  - `data/features.yaml` (e.g., `feature.notifications`, `feature.roles_permissions`)
+  - `data/integrations.yaml` (e.g., `integration.stripe`, `integration.sendgrid`)
+- If the user mentions something not in the catalog, **ask** if you should add it to the YAMLs before continuing.
 
-## Mantenimiento
+## Maintenance
 
-- **Nuevo empleado**: agregar en `roster/employees.yaml`.
-- **Empleado asignado a un proyecto**: agregar en `roster/allocations.yaml`.
-- **Nueva integración/feature/página recurrente**: agregar en el catálogo correspondiente de `data/`.
-- **Calibrar tiempos base**: editar `horas_base` en `data/atomic-tasks.yaml` según aprendizaje de proyectos reales.
-- **Actualizar feriados**: al terminar el año, extender `data/holidays-ar.yaml`.
+- **New employee**: add in `roster/employees.yaml`.
+- **Employee allocated to a project**: add in `roster/allocations.yaml`.
+- **New recurring integration/feature/page**: add in the corresponding `data/` catalog.
+- **Calibrate base times**: edit `base_hours` in `data/atomic-tasks.yaml` based on real project learnings.
+- **Update holidays**: at year end, extend `data/holidays-ar.yaml`.
 
-## Validación
+## Validation
 
-Antes de correr con un input nuevo, conviene verificar:
+Before running with new input, verify:
 ```bash
 python scripts/catalog.py --validate
 python scripts/roster.py --validate
 ```
 
-## Dependencias
+## Dependencies
 
 - Python 3.10+
-- `pyyaml` + `markdown-pdf` (se instalan on-demand con `uv run --with`)
+- `pyyaml` + `markdown-pdf` (installed on-demand with `uv run --with`)
 
-## Escala de dificultad
+## Difficulty scale
 
-| Nivel | Multiplicador | Cuándo usar |
+| Level | Multiplier | When to use |
 |---|---|---|
-| baja | x1.0 | Caso estándar, sin sorpresas |
-| media | x1.8 | Validaciones custom, lógica moderada, UX no trivial |
-| alta | x3.0 | Estado complejo, realtime, compliance, muchas reglas de negocio |
+| low | x1.0 | Standard case, no surprises |
+| medium | x1.8 | Custom validations, moderate logic, non-trivial UX |
+| high | x3.0 | Complex state, realtime, compliance, many business rules |
 
-## Supuestos implícitos
+## Implicit assumptions
 
-- 5 días laborales/semana, 8h/día, 6h productivas (75%).
-- Feriados AR 2026-2028 cargados.
-- Seniority: Junior x1.5, Semi x1.0, Senior x0.7 sobre horas base.
-- Fases secuenciales: Discovery → Diseño → Arquitectura → (Backend || Frontend). QA no está en MVP.
+- 5 working days/week, 8h/day, 6h productive (75%).
+- Argentine holidays 2026-2028 loaded.
+- Seniority: Junior x1.5, Semi x1.0, Senior x0.7 on base hours.
+- Sequential phases: Discovery → Design → Architecture → (Backend || Frontend). QA not in MVP.

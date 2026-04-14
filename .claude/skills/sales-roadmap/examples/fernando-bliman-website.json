@@ -1,13 +1,13 @@
 {
-  "cliente": "Fernando Bliman - Asesor Legal y Consultor de Negocios",
-  "cliente_slug": "fernando-bliman-asesor-legal",
-  "proyecto": "Website institucional",
-  "fecha_inicio_deseada": "2026-05-04",
-  "paginas": [
-    { "id": "page.landing", "dificultad": "baja", "cantidad": 3, "_nota": "home + nosotros + contacto" },
-    { "id": "page.list_view", "dificultad": "baja", "cantidad": 1, "_nota": "servicios" },
-    { "id": "page.detail_view", "dificultad": "baja", "cantidad": 1, "_nota": "opiniones" }
+  "client": "Fernando Bliman - Legal Advisor and Business Consultant",
+  "client_slug": "fernando-bliman-asesor-legal",
+  "project": "Institutional website",
+  "desired_start_date": "2026-05-04",
+  "pages": [
+    { "id": "page.landing", "difficulty": "low", "quantity": 3, "_note": "home + about + contact" },
+    { "id": "page.list_view", "difficulty": "low", "quantity": 1, "_note": "services" },
+    { "id": "page.detail_view", "difficulty": "low", "quantity": 1, "_note": "reviews" }
   ],
   "features": [],
-  "integraciones": []
+  "integrations": []
 }
