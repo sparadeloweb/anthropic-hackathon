@@ -1,4 +1,6 @@
-"""Renderiza un Roadmap a Markdown con resumen, asignaciones, Gantt Mermaid y tabla de tareas."""
+"""Renderiza un Roadmap a Markdown con resumen, asignaciones, Gantt Mermaid y tabla de tareas.
+
+Output pensado para el cliente final: no expone seniority ni detalles internos del equipo."""
 from __future__ import annotations
 
 from datetime import date, timedelta
@@ -18,7 +20,10 @@ def _working_days_between(inicio: date, fin: date, dias_laborables: list[int], h
 
 def render(roadmap: Roadmap, config: dict, holidays: set[date]) -> str:
     lines: list[str] = []
-    lines.append(f"# Roadmap — {roadmap.proyecto}")
+    if roadmap.feature:
+        lines.append(f"# Roadmap — {roadmap.proyecto} — {roadmap.feature}")
+    else:
+        lines.append(f"# Roadmap — {roadmap.proyecto}")
     lines.append("")
 
     # Resumen ejecutivo
@@ -35,29 +40,38 @@ def render(roadmap: Roadmap, config: dict, holidays: set[date]) -> str:
         lines.append(f"  - Motivo: {roadmap.razon_corrimiento}")
     lines.append(f"- **Fecha estimada de fin**: {roadmap.fecha_fin.isoformat()}")
     lines.append(f"- **Duración**: {dias_lab} días laborales")
-    lines.append(f"- **Horas totales**: {round(total_horas, 1)}")
+    lines.append(f"- **Horas totales estimadas**: {round(total_horas, 1)}")
     lines.append("")
 
     # Desglose por departamento
-    lines.append("## Horas por departamento (escala Semi, sin ajuste por seniority)")
+    lines.append("## Horas por área")
     lines.append("")
-    lines.append("| Departamento | Horas |")
+    lines.append("| Área | Horas |")
     lines.append("|---|---:|")
     for d, h in sorted(roadmap.horas_por_depto.items(), key=lambda x: -x[1]):
-        lines.append(f"| {d} | {h} |")
+        lines.append(f"| {d.capitalize()} | {round(h, 1)} |")
     lines.append("")
 
     # Desglose por elemento
-    lines.append("## Horas por elemento")
+    lines.append("## Horas por componente")
     lines.append("")
-    lines.append("| Elemento | Horas |")
+    lines.append("| Componente | Horas |")
     lines.append("|---|---:|")
     for e, h in sorted(roadmap.horas_por_elemento.items(), key=lambda x: -x[1]):
-        lines.append(f"| {e} | {h} |")
+        lines.append(f"| {e} | {round(h, 1)} |")
     lines.append("")
 
-    # Asignaciones nominales
-    lines.append("## Asignaciones nominales")
+    # Resumen de fases
+    lines.append("## Fases del proyecto")
+    lines.append("")
+    lines.append("| Fase | Inicio | Fin | Horas |")
+    lines.append("|---|---|---|---:|")
+    for f in roadmap.fases_resumen:
+        lines.append(f"| {f['fase']} | {f['inicio']} | {f['fin']} | {f['horas']} |")
+    lines.append("")
+
+    # Equipo asignado
+    lines.append("## Equipo asignado")
     lines.append("")
     by_emp: dict[str, dict] = {}
     for t in roadmap.tareas:
@@ -69,30 +83,24 @@ def render(roadmap: Roadmap, config: dict, holidays: set[date]) -> str:
         d["inicio"] = min(d["inicio"], t.inicio)
         d["fin"] = max(d["fin"], t.fin)
 
-    lines.append("| Persona | Depto | Horas | Desde | Hasta |")
+    lines.append("| Persona | Rol | Horas | Desde | Hasta |")
     lines.append("|---|---|---:|---|---|")
     for nombre, info in sorted(by_emp.items()):
         lines.append(
-            f"| {nombre} | {info['depto']} | {round(info['horas'], 1)} | "
+            f"| {nombre} | {info['depto'].capitalize()} | {round(info['horas'], 1)} | "
             f"{info['inicio'].isoformat()} | {info['fin'].isoformat()} |"
         )
     lines.append("")
 
-    # Resumen de fases
-    lines.append("## Fases")
-    lines.append("")
-    lines.append("| Fase | Inicio | Fin | Horas |")
-    lines.append("|---|---|---|---:|")
-    for f in roadmap.fases_resumen:
-        lines.append(f"| {f['fase']} | {f['inicio']} | {f['fin']} | {f['horas']} |")
-    lines.append("")
-
     # Gantt Mermaid
-    lines.append("## Cronograma (Gantt)")
+    lines.append("## Cronograma")
     lines.append("")
     lines.append("```mermaid")
     lines.append("gantt")
-    lines.append(f"    title Roadmap — {roadmap.proyecto}")
+    if roadmap.feature:
+        lines.append(f"    title {roadmap.proyecto} — {roadmap.feature}")
+    else:
+        lines.append(f"    title {roadmap.proyecto}")
     lines.append("    dateFormat YYYY-MM-DD")
 
     by_phase: dict[str, list] = {}
@@ -100,7 +108,7 @@ def render(roadmap: Roadmap, config: dict, holidays: set[date]) -> str:
         by_phase.setdefault(t.fase_id, []).append(t)
 
     for fase_id, tareas in by_phase.items():
-        lines.append(f"    section {fase_id}")
+        lines.append(f"    section {fase_id.capitalize()}")
         for t in tareas:
             dur = (t.fin - t.inicio).days + 1
             nombre = f"{t.atomic_nombre} [{t.empleado_nombre.split()[0]}]"
@@ -112,18 +120,18 @@ def render(roadmap: Roadmap, config: dict, holidays: set[date]) -> str:
     # Tabla detallada
     lines.append("## Detalle de tareas")
     lines.append("")
-    lines.append("| Inicio | Fin | Depto | Tarea | Elemento | Persona | Horas |")
+    lines.append("| Inicio | Fin | Área | Tarea | Componente | Persona | Horas |")
     lines.append("|---|---|---|---|---|---|---:|")
     for t in roadmap.tareas:
         lines.append(
-            f"| {t.inicio.isoformat()} | {t.fin.isoformat()} | {t.departamento} | "
-            f"{t.atomic_nombre} | {t.elemento_nombre} | {t.empleado_nombre} | {t.horas} |"
+            f"| {t.inicio.isoformat()} | {t.fin.isoformat()} | {t.departamento.capitalize()} | "
+            f"{t.atomic_nombre} | {t.elemento_nombre} | {t.empleado_nombre} | {round(t.horas, 1)} |"
         )
     lines.append("")
 
     # Advertencias
     if roadmap.advertencias:
-        lines.append("## Advertencias")
+        lines.append("## Notas")
         lines.append("")
         for a in roadmap.advertencias:
             lines.append(f"- {a}")
@@ -132,11 +140,10 @@ def render(roadmap: Roadmap, config: dict, holidays: set[date]) -> str:
     # Supuestos
     lines.append("## Supuestos")
     lines.append("")
-    lines.append(f"- Jornada: {config['horas_por_dia']}h/día, productividad {int(config['productividad']*100)}%.")
+    lines.append(f"- Jornada laboral: {config['horas_por_dia']}h/día, productividad estimada {int(config['productividad']*100)}%.")
     lines.append("- Días laborales: lunes a viernes.")
-    lines.append("- Feriados: calendario de Argentina.")
-    lines.append("- Multiplicadores dificultad: Baja x1.0, Media x1.8, Alta x3.0.")
-    lines.append("- Multiplicadores seniority: Junior x1.5, Semi x1.0, Senior x0.7 (sobre horas base).")
+    lines.append("- Feriados: calendario de Argentina incluido.")
+    lines.append("- Escala de complejidad: Baja x1.0, Media x1.8, Alta x3.0.")
     lines.append("")
 
     return "\n".join(lines)

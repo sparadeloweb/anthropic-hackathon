@@ -38,6 +38,7 @@ class Roadmap:
     horas_por_depto: dict[str, float] = field(default_factory=dict)
     horas_por_elemento: dict[str, float] = field(default_factory=dict)
     advertencias: list[str] = field(default_factory=list)
+    feature: str = ""  # Nombre de la feature si es un roadmap incremental
 
 
 # ---------------- helpers ----------------
@@ -357,4 +358,5 @@ def build_roadmap(
         horas_por_depto={k: round(v, 2) for k, v in horas_por_depto.items()},
         horas_por_elemento={k: round(v, 2) for k, v in horas_por_elemento.items()},
         advertencias=advertencias,
+        feature=input_data.get("feature", ""),
     )
