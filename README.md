@@ -66,16 +66,86 @@ agencIA/
     └── creating-skills/          # Meta: create skills
 ```
 
+## Prerequisites
+
+| Tool | Version | Required for | Install |
+|------|---------|-------------|---------|
+| **Claude Code** | latest | Everything | `npm i -g @anthropic-ai/claude-code` |
+| **Python** | 3.10+ | Sales pipeline scripts | [python.org](https://www.python.org/downloads/) |
+| **uv** | latest | sales-roadmap, sales-pricing (runs deps on the fly) | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| **Node.js** | 18+ | Dev skills (Next.js, Playwright) | [nodejs.org](https://nodejs.org/) |
+| **GitHub CLI** | latest | dev-add-feature, dev-review-pr | `brew install gh` / `sudo apt install gh` / `winget install GitHub.cli` |
+| **Git** | 2.x | Version control | Pre-installed on most systems |
+
 ## Setup
 
+### 1. Clone and run the setup script
+
 ```bash
+git clone https://github.com/sparadeloweb/anthropic-hackathon.git agencIA
+cd agencIA
 bash setup.sh
 ```
 
-Then edit `.env` and add your API keys:
+This creates a Python virtual environment, installs dependencies (`requests`, `python-dotenv`), and copies `.env.example` → `.env`.
+
+### 2. Configure API keys
+
+Edit `.env` with your keys:
 
 ```bash
-GOOGLE_PLACES_API_KEY=your-actual-key-here
+# Google Places API — used by /sales-finding-leads
+# Get yours at: https://console.cloud.google.com/apis/credentials
+# Enable "Places API (New)" in APIs & Services > Library
+GOOGLE_PLACES_API_KEY=your-api-key-here
+
+# Google Stitch API — used by /design-generating-websites
+# Get yours at: https://stitch.withgoogle.com (Settings > API Keys)
+STITCH_API_KEY=your-api-key-here
+```
+
+### 3. Configure MCP servers
+
+These MCP servers need to be registered in Claude Code:
+
+**Stitch** (required for `/design-generating-websites`):
+
+```bash
+claude mcp add stitch \
+  --transport http https://stitch.googleapis.com/mcp \
+  --header "X-Goog-Api-Key: YOUR-STITCH-API-KEY" \
+  -s user
+```
+
+**Notion** (optional — used by dev skills for documentation):
+
+> Configured via Claude Code's built-in Notion integration at [claude.ai](https://claude.ai) under Settings > Integrations.
+
+**Vercel** (optional — used by `/dev-deploy`):
+
+```bash
+claude mcp add vercel --transport http https://mcp.vercel.com -s user
+```
+
+**Gmail** (optional — future email delivery):
+
+> Configured via Claude Code's built-in Gmail integration.
+
+### 4. Authenticate GitHub CLI (for dev skills)
+
+```bash
+gh auth login
+gh repo set-default OWNER/REPO
+```
+
+### 5. Verify everything
+
+```bash
+source venv/bin/activate
+python3 -c "import requests, dotenv; print('Python deps OK')"
+uv --version          # should print version
+gh auth status        # should show logged in
+claude --version      # should print version
 ```
 
 ## Skills — Sales Pipeline
