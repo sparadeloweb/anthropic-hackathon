@@ -86,10 +86,12 @@ Generates professional website designs in [Google Stitch](https://stitch.withgoo
 
 **Features:**
 - Processes single leads, custom selections, or all leads without a website
+- Asks for project type: **Single Page** (landing), **Multi Page** (website with nav), or **App** (mobile native screens)
+- Asks for platform: Desktop, Mobile-first, App (iOS/Android), Tablet
 - Analyzes photos, reviews, hours, and business type to inform design direction
 - Creates design systems with appropriate typography, colors, and roundness per business type
-- Generates desktop + mobile screens with data-driven prompts
-- Follows premium UI/UX principles (no AI-generic aesthetics)
+- Generates screens with data-driven prompts using real lead data
+- Follows premium UI/UX principles from [ui-ux-pro-max](https://skills.sh/kimny1143/claude-code-template/ui-ux-pro-max) and [frontend-design](https://skills.sh/anthropics/skills/frontend-design)
 
 **Usage:**
 ```

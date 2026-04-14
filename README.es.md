@@ -86,10 +86,12 @@ Genera disenos de sitios web profesionales en [Google Stitch](https://stitch.wit
 
 **Funcionalidades:**
 - Procesa leads individuales, selecciones personalizadas, o todos los leads sin web
+- Pregunta tipo de proyecto: **Single Page** (landing), **Multi Page** (sitio con navegacion), o **App** (pantallas nativas mobile)
+- Pregunta plataforma: Desktop, Mobile-first, App (iOS/Android), Tablet
 - Analiza fotos, reviews, horarios y tipo de negocio para definir la direccion de diseno
 - Crea design systems con tipografia, colores y bordes apropiados por tipo de negocio
-- Genera pantallas desktop + mobile con prompts basados en datos reales
-- Sigue principios de UI/UX premium (sin estetica generica de IA)
+- Genera pantallas con prompts basados en datos reales del lead
+- Sigue principios de UI/UX premium de [ui-ux-pro-max](https://skills.sh/kimny1143/claude-code-template/ui-ux-pro-max) y [frontend-design](https://skills.sh/anthropics/skills/frontend-design)
 
 **Uso:**
 ```
