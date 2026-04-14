@@ -108,3 +108,19 @@ Genera un diseno de sitio web en [Google Stitch](https://stitch.withgoogle.com) 
 ```
 
 **Requiere:** Stitch MCP configurado con API key. Ver `SETUP-STITCH.md` para detalles.
+
+### `/dev-from-design-to-code`
+
+Convierte disenos de Stitch en codigo de produccion: frontend Next.js (React) con backend Laravel API opcional. Pregunta si necesita backend, scaffoldea el proyecto, divide disenos en componentes minimos, escribe tests (Playwright + Pest), instala dependencias, y documenta todo en Notion.
+
+### `/dev-deploy`
+
+Despliega frontend a Vercel y/o backend a Laravel Cloud. Ejecuta checks pre-deploy (build, lint, tests), despliega via MCP o CLI, verifica produccion, y genera documentacion de deploy en Notion si no existe.
+
+### `/dev-add-feature`
+
+Agrega features o corrige bugs en codigo existente. Verifica GitHub CLI, crea branches con naming convencional, implementa cambios siguiendo patrones del proyecto, corre tests, crea PRs via `gh`, y actualiza documentacion en Notion.
+
+### `/dev-review-pr`
+
+Revisa pull requests por calidad de codigo, performance, seguridad y mejores practicas. Lee el diff completo, chequea contra checklists de React y Laravel, y postea comentarios de review directamente en GitHub via `gh` CLI.
