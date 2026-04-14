@@ -168,37 +168,104 @@ After generation completes, download all screenshots locally.
 ```
 stitch_designs/
 └── lead-name-slug/
-    ├── landing.png           (single page)
-    ├── home.png              (multi page)
-    ├── about.png             (multi page)
-    ├── services.png          (multi page)
-    ├── reviews.png           (multi page)
-    ├── contact.png           (multi page)
-    └── stitch_project.json   (project metadata: id, urls, screen ids)
+    ├── screens/
+    │   ├── 01-home.png
+    │   ├── 02-nosotros.png
+    │   ├── ...
+    ├── design-system/
+    │   ├── color-palette.png     (generated color swatch image)
+    │   ├── typography.md         (font choices and scale)
+    │   └── tokens.json           (full design system theme dump)
+    └── stitch_project.json       (project metadata)
 ```
 
-For each screen, get the screenshot URL from `get_screen` or the generate response, then download:
+**6a. Download screenshots:**
 ```bash
-mkdir -p stitch_designs/lead-name-slug
-curl -L -o stitch_designs/lead-name-slug/screen-name.png "SCREENSHOT_URL"
+mkdir -p stitch_designs/lead-name-slug/screens
+curl -L -o stitch_designs/lead-name-slug/screens/01-screen-name.png "SCREENSHOT_URL"
 ```
 
-Save project metadata:
+**6b. Generate and save design system assets:**
+
+Create a color palette swatch image:
 ```bash
 python3 -c "
-import json
-meta = {
-    'projectId': 'PROJECT_ID',
-    'leadName': 'Lead Name',
-    'projectType': 'single_page|multi_page|app',
-    'screens': [
-        {'name': 'landing', 'screenId': 'ID', 'screenshotUrl': 'URL', 'htmlUrl': 'URL'}
-    ]
-}
-json.dump(meta, open('stitch_designs/lead-name-slug/stitch_project.json', 'w'), indent=2)
+import struct, zlib
+
+def create_palette_png(colors, labels, path):
+    w, h_per = 200, 60
+    h = h_per * len(colors)
+    def row(r, g, b, width):
+        return b'\x00' + bytes([r, g, b]) * width
+    raw = b''
+    for hex_color in colors:
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2],16), int(hex_color[2:4],16), int(hex_color[4:6],16)
+        for _ in range(h_per):
+            raw += row(r, g, b, w)
+    def png_chunk(ctype, data):
+        c = ctype + data
+        return struct.pack('>I', len(data)) + c + struct.pack('>I', zlib.crc32(c) & 0xffffffff)
+    sig = b'\x89PNG\r\n\x1a\n'
+    ihdr = struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)
+    with open(path, 'wb') as f:
+        f.write(sig + png_chunk(b'IHDR', ihdr) + png_chunk(b'IDAT', zlib.compress(raw)) + png_chunk(b'IEND', b''))
+    # Also write a text version
+    txt_path = path.replace('.png', '.txt')
+    with open(txt_path, 'w') as f:
+        for color, label in zip(colors, labels):
+            f.write(f'{label}: {color}\n')
+
+create_palette_png(
+    ['PRIMARY_HEX', 'SECONDARY_HEX', 'ACCENT_HEX', 'NEUTRAL_HEX', 'BACKGROUND_HEX'],
+    ['Primary', 'Secondary', 'Accent', 'Neutral', 'Background'],
+    'stitch_designs/lead-name-slug/design-system/color-palette.png'
+)
 "
 ```
 
-Present the results: total screens generated, local file paths, and Stitch project link.
+Save typography reference:
+```bash
+cat > stitch_designs/lead-name-slug/design-system/typography.md << 'EOF'
+# Typography — Lead Name
+
+- Headline: FONT_NAME
+- Body: FONT_NAME
+- Label: FONT_NAME
+
+## Scale
+- Hero: 96px
+- Section: 48px
+- Headline: 30px
+- Subhead: 24px
+- Body: 16px
+- Caption: 14px
+EOF
+```
+
+Dump full design system tokens:
+```bash
+python3 -c "
+import json
+tokens = {
+    'colorMode': 'DARK|LIGHT',
+    'primaryColor': '#hex',
+    'secondaryColor': '#hex',
+    'tertiaryColor': '#hex',
+    'neutralColor': '#hex',
+    'customColor': '#hex',
+    'colorVariant': 'VARIANT',
+    'headlineFont': 'FONT',
+    'bodyFont': 'FONT',
+    'labelFont': 'FONT',
+    'roundness': 'ROUND_X'
+}
+json.dump(tokens, open('stitch_designs/lead-name-slug/design-system/tokens.json', 'w'), indent=2)
+"
+```
+
+**6c. Save project metadata** (`stitch_project.json`) with project ID, lead name, type, design system asset ID, and all screen IDs with their local file paths.
+
+Present the results: total screens, local paths, design system summary, and Stitch project link.
 
 Ask if the user wants to edit any screen (`edit_screens`) or generate variants (`generate_variants`).
