@@ -1,0 +1,56 @@
+# Feriados nacionales de Argentina. Incluye feriados con fecha fija y los movibles ya calculados.
+# Fuente: calendario oficial AR. Mantener actualizado anualmente.
+
+2026:
+  - { fecha: 2026-01-01, nombre: "Año Nuevo" }
+  - { fecha: 2026-02-16, nombre: "Carnaval" }
+  - { fecha: 2026-02-17, nombre: "Carnaval" }
+  - { fecha: 2026-03-24, nombre: "Día Nacional de la Memoria" }
+  - { fecha: 2026-04-02, nombre: "Día del Veterano - Malvinas" }
+  - { fecha: 2026-04-03, nombre: "Viernes Santo" }
+  - { fecha: 2026-05-01, nombre: "Día del Trabajador" }
+  - { fecha: 2026-05-25, nombre: "Día de la Revolución de Mayo" }
+  - { fecha: 2026-06-15, nombre: "Paso a la Inmortalidad Güemes (trasladado)" }
+  - { fecha: 2026-06-20, nombre: "Día de la Bandera" }
+  - { fecha: 2026-07-09, nombre: "Día de la Independencia" }
+  - { fecha: 2026-08-17, nombre: "Paso a la Inmortalidad San Martín (trasladado)" }
+  - { fecha: 2026-10-12, nombre: "Día del Respeto a la Diversidad Cultural" }
+  - { fecha: 2026-11-23, nombre: "Día de la Soberanía Nacional (trasladado)" }
+  - { fecha: 2026-12-08, nombre: "Inmaculada Concepción" }
+  - { fecha: 2026-12-25, nombre: "Navidad" }
+
+2027:
+  - { fecha: 2027-01-01, nombre: "Año Nuevo" }
+  - { fecha: 2027-02-08, nombre: "Carnaval" }
+  - { fecha: 2027-02-09, nombre: "Carnaval" }
+  - { fecha: 2027-03-24, nombre: "Día Nacional de la Memoria" }
+  - { fecha: 2027-03-26, nombre: "Viernes Santo" }
+  - { fecha: 2027-04-02, nombre: "Día del Veterano - Malvinas" }
+  - { fecha: 2027-05-01, nombre: "Día del Trabajador" }
+  - { fecha: 2027-05-25, nombre: "Día de la Revolución de Mayo" }
+  - { fecha: 2027-06-17, nombre: "Paso a la Inmortalidad Güemes" }
+  - { fecha: 2027-06-21, nombre: "Día de la Bandera (trasladado)" }
+  - { fecha: 2027-07-09, nombre: "Día de la Independencia" }
+  - { fecha: 2027-08-16, nombre: "Paso a la Inmortalidad San Martín (trasladado)" }
+  - { fecha: 2027-10-11, nombre: "Día del Respeto a la Diversidad Cultural (trasladado)" }
+  - { fecha: 2027-11-22, nombre: "Día de la Soberanía Nacional (trasladado)" }
+  - { fecha: 2027-12-08, nombre: "Inmaculada Concepción" }
+  - { fecha: 2027-12-25, nombre: "Navidad" }
+
+2028:
+  - { fecha: 2028-01-01, nombre: "Año Nuevo" }
+  - { fecha: 2028-02-28, nombre: "Carnaval" }
+  - { fecha: 2028-02-29, nombre: "Carnaval" }
+  - { fecha: 2028-03-24, nombre: "Día Nacional de la Memoria" }
+  - { fecha: 2028-04-02, nombre: "Día del Veterano - Malvinas" }
+  - { fecha: 2028-04-14, nombre: "Viernes Santo" }
+  - { fecha: 2028-05-01, nombre: "Día del Trabajador" }
+  - { fecha: 2028-05-25, nombre: "Día de la Revolución de Mayo" }
+  - { fecha: 2028-06-17, nombre: "Paso a la Inmortalidad Güemes" }
+  - { fecha: 2028-06-19, nombre: "Día de la Bandera (trasladado)" }
+  - { fecha: 2028-07-09, nombre: "Día de la Independencia" }
+  - { fecha: 2028-08-21, nombre: "Paso a la Inmortalidad San Martín (trasladado)" }
+  - { fecha: 2028-10-09, nombre: "Día del Respeto a la Diversidad Cultural (trasladado)" }
+  - { fecha: 2028-11-20, nombre: "Día de la Soberanía Nacional" }
+  - { fecha: 2028-12-08, nombre: "Inmaculada Concepción" }
+  - { fecha: 2028-12-25, nombre: "Navidad" }
